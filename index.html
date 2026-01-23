@@ -1422,16 +1422,18 @@
                 const percentile = Math.round((numLower / allScores.length) * 100);
 
                 let narrativeKey, cssClass;
-                if (percentile >= 90) {
+                // LOW percentile = BAD (most deprived)
+                // HIGH percentile = GOOD (least deprived)
+                if (percentile <= 10) {
                     narrativeKey = 'top10';
                     cssClass = 'critical';
-                } else if (percentile >= 80) {
+                } else if (percentile <= 20) {
                     narrativeKey = 'top20';
                     cssClass = 'critical';
-                } else if (percentile >= 70) {
+                } else if (percentile <= 30) {
                     narrativeKey = 'top30';
                     cssClass = 'high';
-                } else if (percentile >= 50) {
+                } else if (percentile <= 50) {
                     narrativeKey = 'top50';
                     cssClass = 'moderate';
                 } else {
