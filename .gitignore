@@ -1,0 +1,26 @@
+# Backup files
+*_BACKUP_*
+WORKING_*
+FIXED_*
+
+# Temporary files
+*.tmp
+*.temp
+*_temp.*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+
+# Node modules (if you add any JS tooling later)
+node_modules/

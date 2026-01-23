@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m http.server:*)",
+      "Bash(python3:*)",
+      "Bash(where python py python3)",
+      "Bash(npx http-server:*)",
+      "Bash(py extract_lsoa_data.py:*)",
+      "Bash(where:*)",
+      "Bash(start msedge index.html)",
+      "Bash(cmd /c start index.html)",
+      "Bash(node -e:*)",
+      "Bash(py --version)",
+      "Bash(dir:*)",
+      "Bash(powershell -Command \"Start-Process ''index.html''\")",
+      "Bash(node -c:*)",
+      "Bash(ls -lt \"C:\\\\Users\\\\mudie\\\\OneDrive - Local Trust\\\\2026\\\\PiP Explorer\"/*.html)",
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(python extract_pip_boundaries.py:*)",
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git config:*)"
+    ]
+  }
+}

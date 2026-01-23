@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test LSOA Data Load</title>
+</head>
+<body>
+    <h1>Testing LSOA Data</h1>
+    <div id="output"></div>
+
+    <script src="lsoa_embedded_data_temp.js"></script>
+    <script>
+        const output = document.getElementById('output');
+
+        if (typeof LSOA_MAP_DATA === 'undefined') {
+            output.innerHTML = '<p style="color: red;">ERROR: LSOA_MAP_DATA is not defined!</p>';
+        } else {
+            const keys = Object.keys(LSOA_MAP_DATA);
+            output.innerHTML = `
+                <p style="color: green;">SUCCESS: LSOA_MAP_DATA loaded!</p>
+                <p>Number of MSOAs: ${keys.length}</p>
+                <p>First MSOA: ${keys[0]}</p>
+                <p>First LSOA count: ${LSOA_MAP_DATA[keys[0]].length}</p>
+            `;
+        }
+    </script>
+</body>
+</html>

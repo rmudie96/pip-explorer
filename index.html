@@ -1,0 +1,1486 @@
+<!DOCTYPE html>
+<!--
+    IMPORTANT: To view map boundaries (not just dots), you must run this file through a web server.
+
+    Quick start options:
+    1. Python: python -m http.server 8000
+    2. Node.js: npx http-server
+    3. PHP: php -S localhost:8000
+
+    Then open: http://localhost:8000
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pride in Place Data Explorer | Neighbourhood Intelligence Platform</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* ICON Brand Colors */
+            --primary-dark: #002B5C;
+            --primary-teal: #009B9F;
+            --light-blue: #B0E0E6;
+            --pale-blue: #D9E8F2;
+            --purple-blue: #6E7BA2;
+            --dark-grey: #4A4A4A;
+            --light-grey: #E7E6E6;
+
+            /* Extended Palette */
+            --accent-gold: #C9A858;
+            --deep-teal: #006D6F;
+            --soft-white: #FAFBFC;
+            --warm-grey: #F5F5F5;
+
+            /* Need Spectrum */
+            --need-critical: #DC3545;
+            --need-high: #F97316;
+            --need-moderate: #F59E0B;
+            --need-low: #84CC16;
+            --need-minimal: #10B981;
+
+            /* Typography */
+            --font-display: 'Playfair Display', serif;
+            --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: linear-gradient(135deg, var(--soft-white) 0%, var(--pale-blue) 100%);
+            color: var(--dark-grey);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--deep-teal) 100%);
+            color: white;
+            padding: 4rem 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M 100 0 L 0 0 0 100" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .hero-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero h1 {
+            font-family: var(--font-display);
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1.1rem, 2vw, 1.4rem);
+            opacity: 0.95;
+            font-weight: 300;
+            max-width: 700px;
+            line-height: 1.6;
+        }
+
+        /* Search Section */
+        .search-section {
+            max-width: 1400px;
+            margin: -3rem auto 3rem;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .search-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 20px 60px rgba(0, 43, 92, 0.15);
+            backdrop-filter: blur(10px);
+        }
+
+        .search-label {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .search-input-wrapper {
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1.25rem 1.5rem 1.25rem 3.5rem;
+            border: 2px solid var(--light-grey);
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-family: var(--font-body);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: var(--warm-grey);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-teal);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(0, 155, 159, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--purple-blue);
+            font-size: 1.3rem;
+        }
+
+        .search-results {
+            position: absolute;
+            top: calc(100% + 0.5rem);
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            max-height: 400px;
+            overflow-y: auto;
+            display: none;
+            z-index: 1000;
+        }
+
+        .search-results.active {
+            display: block;
+            animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .search-result {
+            padding: 1.25rem 1.5rem;
+            cursor: pointer;
+            border-bottom: 1px solid var(--light-grey);
+            transition: all 0.2s ease;
+        }
+
+        .search-result:hover {
+            background: var(--warm-grey);
+            padding-left: 2rem;
+        }
+
+        .search-result:last-child {
+            border-bottom: none;
+        }
+
+        .result-name {
+            font-weight: 600;
+            color: var(--primary-dark);
+            font-size: 1.05rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .result-meta {
+            font-size: 0.9rem;
+            color: var(--purple-blue);
+        }
+
+        /* Main Dashboard */
+        .dashboard {
+            display: none;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem 4rem;
+        }
+
+        .dashboard.active {
+            display: block;
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Area Header */
+        .area-header {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .area-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--primary-teal) 0%, var(--deep-teal) 100%);
+        }
+
+        .area-title {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 4vw, 3rem);
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .area-meta {
+            font-size: 1.05rem;
+            color: var(--purple-blue);
+            font-weight: 500;
+        }
+
+        /* Section Cards */
+        .section {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .section-header {
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: clamp(1.75rem, 3vw, 2.25rem);
+            color: var(--primary-dark);
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .section-narrative {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: var(--dark-grey);
+            max-width: 900px;
+            font-weight: 400;
+        }
+
+        .section-narrative strong {
+            color: var(--primary-dark);
+            font-weight: 600;
+        }
+
+        /* Map Container */
+        .map-container {
+            height: 500px;
+            border-radius: 16px;
+            overflow: hidden;
+            margin: 2rem 0;
+            border: 3px solid var(--light-grey);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .map-legend {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-top: 1.5rem;
+            border: 2px solid var(--light-grey);
+        }
+
+        .legend-title {
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .legend-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .legend-color {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .legend-label {
+            font-size: 0.95rem;
+            color: var(--dark-grey);
+            font-weight: 500;
+        }
+
+        /* Overview Grid */
+        .overview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin: 2.5rem 0;
+        }
+
+        .insight-card {
+            background: linear-gradient(135deg, var(--warm-grey) 0%, white 100%);
+            padding: 2rem;
+            border-radius: 16px;
+            border: 2px solid var(--light-grey);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .insight-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+            border-color: var(--primary-teal);
+        }
+
+        .insight-label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--purple-blue);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+        }
+
+        .insight-value {
+            font-family: var(--font-display);
+            font-size: 3.5rem;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-teal) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .insight-value.critical {
+            background: linear-gradient(135deg, var(--need-critical) 0%, #C82333 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .insight-value.high {
+            background: linear-gradient(135deg, var(--need-high) 0%, #E8590C 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .insight-value.moderate {
+            background: linear-gradient(135deg, var(--need-moderate) 0%, #DC7609 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .insight-value.low {
+            background: linear-gradient(135deg, var(--need-low) 0%, #65A30D 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .insight-description {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: var(--dark-grey);
+        }
+
+        /* Mission Cards */
+        .missions-grid {
+            display: grid;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .mission-card {
+            background: white;
+            border: 2px solid var(--light-grey);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .mission-card:hover {
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .mission-header {
+            padding: 1.75rem 2rem;
+            background: linear-gradient(135deg, var(--warm-grey) 0%, white 100%);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            border-bottom: 2px solid var(--light-grey);
+        }
+
+        .mission-header:hover {
+            background: linear-gradient(135deg, var(--pale-blue) 0%, white 100%);
+        }
+
+        .mission-header-content h3 {
+            font-family: var(--font-display);
+            font-size: 1.4rem;
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .mission-summary {
+            font-size: 0.95rem;
+            color: var(--purple-blue);
+            font-style: italic;
+        }
+
+        .mission-indicator {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .mission-score {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        .mission-expand {
+            font-size: 1.5rem;
+            color: var(--purple-blue);
+            transition: transform 0.3s ease;
+        }
+
+        .mission-card.expanded .mission-expand {
+            transform: rotate(180deg);
+        }
+
+        .mission-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .mission-card.expanded .mission-content {
+            max-height: 2000px;
+        }
+
+        .mission-body {
+            padding: 2rem;
+        }
+
+        .mission-narrative {
+            font-size: 1.05rem;
+            line-height: 1.8;
+            color: var(--dark-grey);
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: var(--warm-grey);
+            border-left: 4px solid var(--primary-teal);
+            border-radius: 8px;
+        }
+
+        .data-showcase {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .data-point {
+            background: var(--warm-grey);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--light-grey);
+        }
+
+        .data-label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--purple-blue);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.75rem;
+        }
+
+        .data-value {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 0.75rem;
+        }
+
+        .data-context {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: var(--dark-grey);
+        }
+
+        /* IMD Section */
+        .imd-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .imd-card {
+            background: linear-gradient(135deg, var(--warm-grey) 0%, white 100%);
+            padding: 2rem;
+            border-radius: 16px;
+            border: 2px solid var(--light-grey);
+            transition: all 0.3s ease;
+        }
+
+        .imd-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+            border-color: var(--primary-teal);
+        }
+
+        .imd-score {
+            font-family: var(--font-display);
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .imd-score.critical {
+            color: #DC3545;
+        }
+
+        .imd-score.high {
+            color: #F97316;
+        }
+
+        .imd-score.moderate {
+            color: #F59E0B;
+        }
+
+        .imd-score.low {
+            color: #10B981;
+        }
+
+        .imd-label {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 0.75rem;
+        }
+
+        .imd-description {
+            font-size: 0.9rem;
+            color: var(--dark-grey);
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+
+        .imd-raw-value {
+            font-size: 0.85rem;
+            color: var(--purple-blue);
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--primary-dark);
+            color: white;
+            padding: 3rem 2rem;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .footer-title {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .footer-links a {
+            color: var(--light-blue);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: white;
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero { padding: 3rem 1.5rem; }
+            .search-card { padding: 1.5rem; }
+            .section { padding: 2rem 1.5rem; }
+            .overview-grid { grid-template-columns: 1fr; }
+        }
+
+        /* Utility */
+        .no-data {
+            color: var(--purple-blue);
+            font-style: italic;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--purple-blue);
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <div class="hero">
+        <div class="hero-content">
+            <div style="display: flex; align-items: center; gap: 2rem; margin-bottom: 2rem; flex-wrap: wrap;">
+                <img src="ICON-Logo-Final_optimised.png" alt="ICON" style="height: 60px; filter: brightness(0) invert(1);">
+                <div style="height: 50px; width: 2px; background: rgba(255,255,255,0.3);"></div>
+                <h1 style="margin: 0;">Pride in Place Data Explorer</h1>
+            </div>
+            <p class="hero-subtitle">Working on Pride in Place? Our data explorer will help you understand the challenges facing your neighbourhood.</p>
+            <p style="font-size: 0.9rem; opacity: 0.8; margin-top: 1.5rem; font-weight: 300;">Developed by ICON in partnership with Local Trust</p>
+        </div>
+    </div>
+
+    <!-- Search Section -->
+    <div class="search-section">
+        <div class="search-card">
+            <label class="search-label">Explore a Neighbourhood</label>
+            <div class="search-input-wrapper">
+                <span class="search-icon">🔍</span>
+                <input
+                    type="text"
+                    class="search-input"
+                    id="area-search"
+                    placeholder="Search by neighbourhood name, local authority, or MSOA code..."
+                    autocomplete="off"
+                >
+                <div class="search-results" id="search-results"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="dashboard" id="dashboard">
+        <div class="area-header">
+            <h2 class="area-title" id="area-name">-</h2>
+            <p class="area-meta" id="area-meta">-</p>
+        </div>
+
+        <!-- Overview Section -->
+        <div class="section" id="overview-section">
+            <div class="section-header">
+                <h2 class="section-title">Neighbourhood at a Glance</h2>
+                <p class="section-narrative" id="overview-narrative">Loading insights...</p>
+            </div>
+            <div class="overview-grid" id="overview-grid"></div>
+        </div>
+
+        <!-- Map Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">Geographic Context</h2>
+                <p class="section-narrative" id="map-narrative"></p>
+            </div>
+            <div class="map-container" id="map"></div>
+            <div class="map-legend">
+                <div class="legend-title">LSOA Mission Classification</div>
+                <div class="legend-items">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #DC3545;"></div>
+                        <span class="legend-label">Mission Critical</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #F97316;"></div>
+                        <span class="legend-label">Mission Priority</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #F59E0B;"></div>
+                        <span class="legend-label">Mission Support</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Missions Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">Government Missions Deep Dive</h2>
+                <p class="section-narrative">The UK Government's five missions for national renewal provide a framework for understanding local need. Each mission reveals a different dimension of community challenge and opportunity, from economic vitality to health outcomes.</p>
+            </div>
+            <div class="missions-grid" id="missions-grid"></div>
+        </div>
+
+        <!-- IMD Section -->
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">Deprivation Landscape</h2>
+                <p class="section-narrative">The Indices of Multiple Deprivation (IMD) provide the official government measure of relative deprivation across England's 32,844 neighbourhoods. Each metric is presented as a percentile showing where this area ranks nationally. Lower percentiles (closer to 1st) indicate higher deprivation, while higher percentiles (closer to 100th) indicate lower deprivation relative to other areas.</p>
+            </div>
+            <div class="imd-grid" id="imd-grid"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <h3 class="footer-title">Data Sources & Methodology</h3>
+            <p>This platform integrates authoritative data from multiple sources to provide a comprehensive view of neighbourhood characteristics and needs.</p>
+            <div class="footer-links">
+                <a href="https://www.nomisweb.co.uk" target="_blank">ONS Census 2021 via NOMIS</a>
+                <a href="https://www.gov.uk/government/statistics/english-indices-of-deprivation-2025" target="_blank">English Indices of Deprivation 2025</a>
+                <a href="https://ocsi.uk/hyper-local-need-measure/" target="_blank">OCSI Hyper-Local Need Measure</a>
+                <a href="https://ocsi.uk" target="_blank">OCSI Community Needs Index</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="lsoa_embedded_data_temp.js"></script>
+    <script src="lsoa_embedded_data_temp.js"></script>
+    <script>
+        // EMBEDDED DATA
+        const DATA = {"metadata":{"generated":"2026-01-21","total_areas":40,"note":"Data for 40 Pride in Place neighbourhoods with HLNM indicators"},"areas":[{"msoa_code":"E02001954","neighbourhood_name":"Hawkesley","local_authority":"Birmingham","bad_health_pct":8.2,"bad_health_pct_percentile":78,"no_qualifications_pct":28.5,"no_qualifications_pct_percentile":85,"level4_plus_pct":18.2,"level4_plus_pct_percentile":82,"unemployed_count_percentile":75,"inactive_count_percentile":72,"employed_count_percentile":74,"deprived_pct":62.5,"deprived_pct_percentile":81,"owned_pct":48.2,"owned_pct_percentile":68,"social_rented_pct":35.8,"social_rented_pct_percentile":82,"Index of Multiple Deprivation (IMD) Score":42.8,"Income Score (rate)":0.22,"Employment Score (rate)":0.18,"Education, Skills and Training Score":38.5,"Health Deprivation and Disability Score":0.95,"Crime Score":0.42,"Barriers to Housing and Services Score":22.1,"Living Environment Score":28.4,"hlnm_growth":54.71,"hlnm_energy":21.52,"hlnm_crime":1383,"hlnm_opportunity":40.11,"hlnm_health":52.98,"hlnm_growth_percentile":94.5,"hlnm_energy_percentile":59.9,"hlnm_crime_percentile":99.1,"hlnm_opportunity_percentile":83.9,"hlnm_health_percentile":93.1,"civic_assets_rank":1384,"connectedness_rank":5525,"active_engaged_rank":1677,"lsoa_total":5,"lsoa_critical":0,"lsoa_priority":5,"lsoa_support":0},{"msoa_code":"E02001947","neighbourhood_name":"Druids Heath","local_authority":"Birmingham","bad_health_pct":9.1,"bad_health_pct_percentile":82,"no_qualifications_pct":31.2,"no_qualifications_pct_percentile":88,"level4_plus_pct":15.8,"level4_plus_pct_percentile":86,"unemployed_count_percentile":81,"inactive_count_percentile":78,"employed_count_percentile":79,"deprived_pct":68.2,"deprived_pct_percentile":86,"owned_pct":42.1,"owned_pct_percentile":72,"social_rented_pct":42.5,"social_rented_pct_percentile":88,"Index of Multiple Deprivation (IMD) Score":48.2,"Income Score (rate)":0.25,"Employment Score (rate)":0.21,"Education, Skills and Training Score":45.2,"Health Deprivation and Disability Score":1.12,"Crime Score":0.58,"Barriers to Housing and Services Score":18.5,"Living Environment Score":32.1,"hlnm_growth":76.15,"hlnm_energy":41.18,"hlnm_crime":1780,"hlnm_opportunity":37.46,"hlnm_health":63.98,"hlnm_growth_percentile":99.3,"hlnm_energy_percentile":88.6,"hlnm_crime_percentile":98.6,"hlnm_opportunity_percentile":81.6,"hlnm_health_percentile":96.7,"civic_assets_rank":8328,"connectedness_rank":3836,"active_engaged_rank":3767,"lsoa_total":4,"lsoa_critical":2,"lsoa_priority":2,"lsoa_support":0},{"msoa_code":"E02001948","neighbourhood_name":"Glebe Farm","local_authority":"Birmingham","bad_health_pct":8.8,"bad_health_pct_percentile":80,"no_qualifications_pct":29.8,"no_qualifications_pct_percentile":86,"level4_plus_pct":16.5,"level4_plus_pct_percentile":84,"unemployed_count_percentile":78,"inactive_count_percentile":75,"employed_count_percentile":76,"deprived_pct":65.1,"deprived_pct_percentile":84,"owned_pct":45.2,"owned_pct_percentile":70,"social_rented_pct":38.5,"social_rented_pct_percentile":85,"Index of Multiple Deprivation (IMD) Score":45.1,"Income Score (rate)":0.23,"Employment Score (rate)":0.19,"Education, Skills and Training Score":41.2,"Health Deprivation and Disability Score":1.02,"Crime Score":0.48,"Barriers to Housing and Services Score":20.2,"Living Environment Score":30.1,"hlnm_growth":24.35,"hlnm_energy":39.07,"hlnm_crime":10603,"hlnm_opportunity":20.43,"hlnm_health":23.90,"hlnm_growth_percentile":65.2,"hlnm_energy_percentile":86.8,"hlnm_crime_percentile":74.1,"hlnm_opportunity_percentile":58.4,"hlnm_health_percentile":65.4,"civic_assets_rank":4676,"connectedness_rank":21711,"active_engaged_rank":6961,"lsoa_total":5,"lsoa_critical":0,"lsoa_priority":1,"lsoa_support":4},{"msoa_code":"E02001949","neighbourhood_name":"Kingstanding South East","local_authority":"Birmingham","bad_health_pct":8.5,"bad_health_pct_percentile":79,"no_qualifications_pct":27.8,"no_qualifications_pct_percentile":84,"level4_plus_pct":19.2,"level4_plus_pct_percentile":80,"unemployed_count_percentile":74,"inactive_count_percentile":71,"employed_count_percentile":73,"deprived_pct":61.2,"deprived_pct_percentile":80,"owned_pct":52.1,"owned_pct_percentile":65,"social_rented_pct":32.5,"social_rented_pct_percentile":79,"Index of Multiple Deprivation (IMD) Score":41.2,"Income Score (rate)":0.21,"Employment Score (rate)":0.17,"Education, Skills and Training Score":36.8,"Health Deprivation and Disability Score":0.88,"Crime Score":0.38,"Barriers to Housing and Services Score":24.5,"Living Environment Score":26.8,"hlnm_growth":21.95,"hlnm_energy":34.80,"hlnm_crime":8159,"hlnm_opportunity":29.44,"hlnm_health":37.03,"hlnm_growth_percentile":60.7,"hlnm_energy_percentile":82.8,"hlnm_crime_percentile":82.5,"hlnm_opportunity_percentile":72.6,"hlnm_health_percentile":83,"civic_assets_rank":19086,"connectedness_rank":12455,"active_engaged_rank":12452,"lsoa_total":4,"lsoa_critical":0,"lsoa_priority":1,"lsoa_support":3},{"msoa_code":"E02001950","neighbourhood_name":"Woodgate","local_authority":"Birmingham","bad_health_pct":7.9,"bad_health_pct_percentile":76,"no_qualifications_pct":26.5,"no_qualifications_pct_percentile":82,"level4_plus_pct":20.5,"level4_plus_pct_percentile":78,"unemployed_count_percentile":72,"inactive_count_percentile":69,"employed_count_percentile":71,"deprived_pct":58.5,"deprived_pct_percentile":78,"owned_pct":55.2,"owned_pct_percentile":62,"social_rented_pct":28.5,"social_rented_pct_percentile":75,"Index of Multiple Deprivation (IMD) Score":38.5,"Income Score (rate)":0.19,"Employment Score (rate)":0.15,"Education, Skills and Training Score":34.2,"Health Deprivation and Disability Score":0.78,"Crime Score":0.32,"Barriers to Housing and Services Score":26.8,"Living Environment Score":24.5,"hlnm_growth":19.85,"hlnm_energy":33.99,"hlnm_crime":12647,"hlnm_opportunity":17.28,"hlnm_health":16.36,"hlnm_growth_percentile":56.2,"hlnm_energy_percentile":82,"hlnm_crime_percentile":66.4,"hlnm_opportunity_percentile":52.5,"hlnm_health_percentile":48.9,"civic_assets_rank":8346,"connectedness_rank":20124,"active_engaged_rank":15814,"lsoa_total":5,"lsoa_critical":0,"lsoa_priority":0,"lsoa_support":5},{"msoa_code":"E02001951","neighbourhood_name":"Sparkbrook North","local_authority":"Birmingham","bad_health_pct":9.5,"bad_health_pct_percentile":84,"no_qualifications_pct":32.5,"no_qualifications_pct_percentile":89,"level4_plus_pct":22.1,"level4_plus_pct_percentile":75,"unemployed_count_percentile":85,"inactive_count_percentile":82,"employed_count_percentile":83,"deprived_pct":72.1,"deprived_pct_percentile":89,"owned_pct":38.5,"owned_pct_percentile":75,"social_rented_pct":28.2,"social_rented_pct_percentile":74,"Index of Multiple Deprivation (IMD) Score":52.1,"Income Score (rate)":0.28,"Employment Score (rate)":0.24,"Education, Skills and Training Score":48.5,"Health Deprivation and Disability Score":1.25,"Crime Score":0.72,"Barriers to Housing and Services Score":15.2,"Living Environment Score":38.5,"hlnm_growth":58.17,"hlnm_energy":14.35,"hlnm_crime":2844,"hlnm_opportunity":31.92,"hlnm_health":59.37,"hlnm_growth_percentile":95.8,"hlnm_energy_percentile":38.9,"hlnm_crime_percentile":97,"hlnm_opportunity_percentile":75.6,"hlnm_health_percentile":95.3,"civic_assets_rank":2639,"connectedness_rank":6860,"active_engaged_rank":614,"lsoa_total":6,"lsoa_critical":0,"lsoa_priority":5,"lsoa_support":1},{"msoa_code":"E02001952","neighbourhood_name":"Fox Hollies","local_authority":"Birmingham","bad_health_pct":8.1,"bad_health_pct_percentile":77,"no_qualifications_pct":27.2,"no_qualifications_pct_percentile":83,"level4_plus_pct":19.8,"level4_plus_pct_percentile":79,"unemployed_count_percentile":73,"inactive_count_percentile":70,"employed_count_percentile":72,"deprived_pct":60.2,"deprived_pct_percentile":79,"owned_pct":51.5,"owned_pct_percentile":66,"social_rented_pct":31.2,"social_rented_pct_percentile":78,"Index of Multiple Deprivation (IMD) Score":40.2,"Income Score (rate)":0.20,"Employment Score (rate)":0.16,"Education, Skills and Training Score":35.5,"Health Deprivation and Disability Score":0.82,"Crime Score":0.35,"Barriers to Housing and Services Score":25.2,"Living Environment Score":25.8,"hlnm_growth":54.65,"hlnm_energy":19.45,"hlnm_crime":1979,"hlnm_opportunity":32.28,"hlnm_health":48.20,"hlnm_growth_percentile":94.4,"hlnm_energy_percentile":53.9,"hlnm_crime_percentile":98.3,"hlnm_opportunity_percentile":76.1,"hlnm_health_percentile":90.6,"civic_assets_rank":7155,"connectedness_rank":4778,"active_engaged_rank":4034,"lsoa_total":5,"lsoa_critical":0,"lsoa_priority":4,"lsoa_support":1},{"msoa_code":"E02001953","neighbourhood_name":"Nechells","local_authority":"Birmingham","bad_health_pct":10.2,"bad_health_pct_percentile":87,"no_qualifications_pct":35.2,"no_qualifications_pct_percentile":91,"level4_plus_pct":18.5,"level4_plus_pct_percentile":81,"unemployed_count_percentile":88,"inactive_count_percentile":85,"employed_count_percentile":86,"deprived_pct":75.5,"deprived_pct_percentile":92,"owned_pct":32.1,"owned_pct_percentile":80,"social_rented_pct":45.2,"social_rented_pct_percentile":90,"Index of Multiple Deprivation (IMD) Score":58.2,"Income Score (rate)":0.32,"Employment Score (rate)":0.28,"Education, Skills and Training Score":52.1,"Health Deprivation and Disability Score":1.45,"Crime Score":0.85,"Barriers to Housing and Services Score":12.5,"Living Environment Score":42.5,"hlnm_growth":20.26,"hlnm_energy":32.41,"hlnm_crime":12641,"hlnm_opportunity":16.56,"hlnm_health":16.70,"hlnm_growth_percentile":56.9,"hlnm_energy_percentile":80,"hlnm_crime_percentile":66.4,"hlnm_opportunity_percentile":51.1,"hlnm_health_percentile":49.8,"civic_assets_rank":14070,"connectedness_rank":17077,"active_engaged_rank":17449,"lsoa_total":5,"lsoa_critical":0,"lsoa_priority":0,"lsoa_support":5},{"msoa_code":"E02001405","neighbourhood_name":"Speke East","local_authority":"Liverpool","bad_health_pct":9.8,"bad_health_pct_percentile":85,"no_qualifications_pct":30.5,"no_qualifications_pct_percentile":87,"level4_plus_pct":14.2,"level4_plus_pct_percentile":88,"unemployed_count_percentile":82,"inactive_count_percentile":79,"employed_count_percentile":80,"deprived_pct":70.2,"deprived_pct_percentile":88,"owned_pct":38.5,"owned_pct_percentile":75,"social_rented_pct":48.2,"social_rented_pct_percentile":91,"Index of Multiple Deprivation (IMD) Score":55.2,"Income Score (rate)":0.30,"Employment Score (rate)":0.26,"Education, Skills and Training Score":50.2,"Health Deprivation and Disability Score":1.35,"Crime Score":0.65,"Barriers to Housing and Services Score":14.8,"Living Environment Score":35.2,"hlnm_growth":63.00,"hlnm_energy":4.97,"hlnm_crime":5936,"hlnm_opportunity":93.63,"hlnm_health":79.39,"hlnm_growth_percentile":97.3,"hlnm_energy_percentile":9.2,"hlnm_crime_percentile":89.5,"hlnm_opportunity_percentile":99.9,"hlnm_health_percentile":99.1,"civic_assets_rank":1000,"connectedness_rank":6706,"active_engaged_rank":505,"lsoa_total":6,"lsoa_critical":3,"lsoa_priority":3,"lsoa_support":0},{"msoa_code":"E02001406","neighbourhood_name":"Everton East","local_authority":"Liverpool","bad_health_pct":10.5,"bad_health_pct_percentile":88,"no_qualifications_pct":33.8,"no_qualifications_pct_percentile":90,"level4_plus_pct":16.2,"level4_plus_pct_percentile":85,"unemployed_count_percentile":86,"inactive_count_percentile":83,"employed_count_percentile":84,"deprived_pct":74.5,"deprived_pct_percentile":91,"owned_pct":28.5,"owned_pct_percentile":82,"social_rented_pct":52.1,"social_rented_pct_percentile":93,"Index of Multiple Deprivation (IMD) Score":62.5,"Income Score (rate)":0.35,"Employment Score (rate)":0.30,"Education, Skills and Training Score":55.2,"Health Deprivation and Disability Score":1.55,"Crime Score":0.92,"Barriers to Housing and Services Score":10.5,"Living Environment Score":45.2,"hlnm_growth":7.58,"hlnm_energy":45.40,"hlnm_crime":26122,"hlnm_opportunity":19.25,"hlnm_health":19.50,"hlnm_growth_percentile":22,"hlnm_energy_percentile":91,"hlnm_crime_percentile":15.299999999999997,"hlnm_opportunity_percentile":56.4,"hlnm_health_percentile":56.6,"civic_assets_rank":6630,"connectedness_rank":23346,"active_engaged_rank":27515,"lsoa_total":6,"lsoa_critical":0,"lsoa_priority":0,"lsoa_support":6},{"msoa_code":"E02001407","neighbourhood_name":"Norris Green East","local_authority":"Liverpool","bad_health_pct":9.2,"bad_health_pct_percentile":83,"no_qualifications_pct":29.2,"no_qualifications_pct_percentile":86,"level4_plus_pct":15.5,"level4_plus_pct_percentile":87,"unemployed_count_percentile":79,"inactive_count_percentile":76,"employed_count_percentile":77,"deprived_pct":67.5,"deprived_pct_percentile":85,"owned_pct":42.5,"owned_pct_percentile":71,"social_rented_pct":42.1,"social_rented_pct_percentile":87,"Index of Multiple Deprivation (IMD) Score":49.5,"Income Score (rate)":0.26,"Employment Score (rate)":0.22,"Education, Skills and Training Score":46.5,"Health Deprivation and Disability Score":1.15,"Crime Score":0.55,"Barriers to Housing and Services Score":16.5,"Living Environment Score":32.5,"hlnm_growth":10.57,"hlnm_energy":22.70,"hlnm_crime":20094,"hlnm_opportunity":17.90,"hlnm_health":25.23,"hlnm_growth_percentile":32.1,"hlnm_energy_percentile":62.8,"hlnm_crime_percentile":38.8,"hlnm_opportunity_percentile":53.8,"hlnm_health_percentile":67.7,"civic_assets_rank":9690,"connectedness_rank":23922,"active_engaged_rank":17866,"lsoa_total":4,"lsoa_critical":0,"lsoa_priority":0,"lsoa_support":4},{"msoa_code":"E02001408","neighbourhood_name":"Fairfield West & Newsham Park","local_authority":"Liverpool","bad_health_pct":8.8,"bad_health_pct_percentile":80,"no_qualifications_pct":28.1,"no_qualifications_pct_percentile":84,"level4_plus_pct":21.5,"level4_plus_pct_percentile":76,"unemployed_count_percentile":76,"inactive_count_percentile":73,"employed_count_percentile":74,"deprived_pct":64.2,"deprived_pct_percentile":83,"owned_pct":35.2,"owned_pct_percentile":77,"social_rented_pct":38.5,"social_rented_pct_percentile":85,"Index of Multiple Deprivation (IMD) Score":46.2,"Income Score (rate)":0.24,"Employment Score (rate)":0.20,"Education, Skills and Training Score":42.5,"Health Deprivation and Disability Score":1.05,"Crime Score":0.62,"Barriers to Housing and Services Score":18.2,"Living Environment Score":38.5,"hlnm_growth":10.52,"hlnm_energy":30.67,"hlnm_crime":23489,"hlnm_opportunity":16.93,"hlnm_health":18.91,"hlnm_growth_percentile":31.9,"hlnm_energy_percentile":77.5,"hlnm_crime_percentile":25.700000000000003,"hlnm_opportunity_percentile":51.8,"hlnm_health_percentile":55.3,"civic_assets_rank":31259,"connectedness_rank":21691,"active_engaged_rank":14056,"lsoa_total":4,"lsoa_critical":0,"lsoa_priority":0,"lsoa_support":4},{"msoa_code":"E02001094","neighbourhood_name":"Benchill South & Wythenshawe Central","local_authority":"Manchester","bad_health_pct":9.5,"bad_health_pct_percentile":84,"no_qualifications_pct":31.5,"no_qualifications_pct_percentile":88,"level4_plus_pct":13.8,"level4_plus_pct_percentile":89,"unemployed_count_percentile":83,"inactive_count_percentile":80,"employed_count_percentile":81,"deprived_pct":71.5,"deprived_pct_percentile":89,"owned_pct":35.5,"owned_pct_percentile":77,"social_rented_pct":50.2,"social_rented_pct_percentile":92,"Index of Multiple Deprivation (IMD) Score":56.8,"Income Score (rate)":0.31,"Employment Score (rate)":0.27,"Education, Skills and Training Score":51.5,"Health Deprivation and Disability Score":1.38,"Crime Score":0.68,"Barriers to Housing and Services Score":13.5,"Living Environment Score":36.5,"hlnm_growth":50.42,"hlnm_energy":2.47,"hlnm_crime":2099,"hlnm_opportunity":37.28,"hlnm_health":66.61,"hlnm_growth_percentile":92.5,"hlnm_energy_percentile":3.4,"hlnm_crime_percentile":98.2,"hlnm_opportunity_percentile":81.4,"hlnm_health_percentile":97.2,"civic_assets_rank":5389,"connectedness_rank":8826,"active_engaged_rank":702,"lsoa_total":5,"lsoa_critical":0,"lsoa_priority":5,"lsoa_support":0},{"msoa_code":"E02001095","neighbourhood_name":"Harpurhey South & Monsall","local_authority":"Manchester","bad_health_pct":10.1,"bad_health_pct_percentile":86,"no_qualifications_pct":34.2,"no_qualifications_pct_percentile":90,"level4_plus_pct":15.2,"level4_plus_pct_percentile":87,"unemployed_count_percentile":87,"inactive_count_percentile":84,"employed_count_percentile":85,"deprived_pct":76.2,"deprived_pct_percentile":92,"owned_pct":30.2,"owned_pct_percentile":81,"social_rented_pct":48.5,"social_rented_pct_percentile":91,"Index of Multiple Deprivation (IMD) Score":60.5,"Income Score (rate)":0.34,"Employment Score (rate)":0.29,"Education, Skills and Training Score":54.2,"Health Deprivation and Disability Score":1.48,"Crime Score":0.82,"Barriers to Housing and Services Score":11.2,"Living Environment Score":40.5,"hlnm_growth":31.48,"hlnm_energy":3.85,"hlnm_crime":5604,"hlnm_opportunity":27.70,"hlnm_health":58.59,"hlnm_growth_percentile":75.9,"hlnm_energy_percentile":6.4,"hlnm_crime_percentile":90.3,"hlnm_opportunity_percentile":70,"hlnm_health_percentile":95,"civic_assets_rank":10363,"connectedness_rank":14378,"active_engaged_rank":3496,"lsoa_total":5,"lsoa_critical":0,"lsoa_priority":3,"lsoa_support":2},{"msoa_code":"E02001096","neighbourhood_name":"Clayton Vale","local_authority":"Manchester","bad_health_pct":8.9,"bad_health_pct_percentile":81,"no_qualifications_pct":29.5,"no_qualifications_pct_percentile":86,"level4_plus_pct":17.2,"level4_plus_pct_percentile":83,"unemployed_count_percentile":78,"inactive_count_percentile":75,"employed_count_percentile":76,"deprived_pct":66.8,"deprived_pct_percentile":85,"owned_pct":42.8,"owned_pct_percentile":71,"social_rented_pct":40.5,"social_rented_pct_percentile":86,"Index of Multiple Deprivation (IMD) Score":48.5,"Income Score (rate)":0.25,"Employment Score (rate)":0.21,"Education, Skills and Training Score":44.8,"Health Deprivation and Disability Score":1.08,"Crime Score":0.52,"Barriers to Housing and Services Score":17.5,"Living Environment Score":34.2,"hlnm_growth":30.38,"hlnm_energy":8.18,"hlnm_crime":8794,"hlnm_opportunity":26.38,"hlnm_health":39.89,"hlnm_growth_percentile":74.6,"hlnm_energy_percentile":18,"hlnm_crime_percentile":80.4,"hlnm_opportunity_percentile":68,"hlnm_health_percentile":85.6,"civic_assets_rank":18138,"connectedness_rank":12398,"active_engaged_rank":3640,"lsoa_total":5,"lsoa_critical":0,"lsoa_priority":2,"lsoa_support":3},{"msoa_code":"E02001097","neighbourhood_name":"Gorton South","local_authority":"Manchester","bad_health_pct":9.2,"bad_health_pct_percentile":83,"no_qualifications_pct":30.8,"no_qualifications_pct_percentile":87,"level4_plus_pct":16.8,"level4_plus_pct_percentile":84,"unemployed_count_percentile":80,"inactive_count_percentile":77,"employed_count_percentile":78,"deprived_pct":68.5,"deprived_pct_percentile":86,"owned_pct":40.2,"owned_pct_percentile":73,"social_rented_pct":44.2,"social_rented_pct_percentile":89,"Index of Multiple Deprivation (IMD) Score":51.2,"Income Score (rate)":0.27,"Employment Score (rate)":0.23,"Education, Skills and Training Score":47.2,"Health Deprivation and Disability Score":1.18,"Crime Score":0.58,"Barriers to Housing and Services Score":15.8,"Living Environment Score":36.8,"hlnm_growth":30.63,"hlnm_energy":3.29,"hlnm_crime":7026,"hlnm_opportunity":37.36,"hlnm_health":58.51,"hlnm_growth_percentile":75,"hlnm_energy_percentile":5.1,"hlnm_crime_percentile":86,"hlnm_opportunity_percentile":81.5,"hlnm_health_percentile":95,"civic_assets_rank":6163,"connectedness_rank":12542,"active_engaged_rank":4140,"lsoa_total":5,"lsoa_critical":0,"lsoa_priority":4,"lsoa_support":1},{"msoa_code":"E02002385","neighbourhood_name":"Middleton Park Avenue","local_authority":"Leeds","bad_health_pct":9.0,"bad_health_pct_percentile":82,"no_qualifications_pct":28.8,"no_qualifications_pct_percentile":85,"level4_plus_pct":16.5,"level4_plus_pct_percentile":84,"unemployed_count_percentile":77,"inactive_count_percentile":74,"employed_count_percentile":75,"deprived_pct":65.5,"deprived_pct_percentile":84,"owned_pct":48.5,"owned_pct_percentile":68,"social_rented_pct":38.2,"social_rented_pct_percentile":85,"Index of Multiple Deprivation (IMD) Score":47.2,"Income Score (rate)":0.24,"Employment Score (rate)":0.20,"Education, Skills and Training Score":43.5,"Health Deprivation and Disability Score":1.05,"Crime Score":0.48,"Barriers to Housing and Services Score":19.5,"Living Environment Score":28.5,"hlnm_growth":11.18,"hlnm_energy":31.92,"hlnm_crime":5965,"hlnm_opportunity":19.67,"hlnm_health":29.81,"hlnm_growth_percentile":33.9,"hlnm_energy_percentile":79.4,"hlnm_crime_percentile":89.5,"hlnm_opportunity_percentile":57.1,"hlnm_health_percentile":74.8,"civic_assets_rank":29180,"connectedness_rank":22478,"active_engaged_rank":9744,"lsoa_total":5,"lsoa_critical":0,"lsoa_priority":2,"lsoa_support":3},{"msoa_code":"E02002386","neighbourhood_name":"Seacroft North & Monkswood","local_authority":"Leeds","bad_health_pct":9.8,"bad_health_pct_percentile":85,"no_qualifications_pct":32.2,"no_qualifications_pct_percentile":89,"level4_plus_pct":12.5,"level4_plus_pct_percentile":90,"unemployed_count_percentile":84,"inactive_count_percentile":81,"employed_count_percentile":82,"deprived_pct":72.5,"deprived_pct_percentile":90,"owned_pct":35.2,"owned_pct_percentile":77,"social_rented_pct":52.5,"social_rented_pct_percentile":93,"Index of Multiple Deprivation (IMD) Score":58.5,"Income Score (rate)":0.32,"Employment Score (rate)":0.28,"Education, Skills and Training Score":54.5,"Health Deprivation and Disability Score":1.42,"Crime Score":0.72,"Barriers to Housing and Services Score":12.8,"Living Environment Score":32.2,"hlnm_growth":9.82,"hlnm_energy":21.98,"hlnm_crime":13313,"hlnm_opportunity":6.04,"hlnm_health":8.78,"hlnm_growth_percentile":29.9,"hlnm_energy_percentile":61.2,"hlnm_crime_percentile":63.6,"hlnm_opportunity_percentile":21.6,"hlnm_health_percentile":25.5,"civic_assets_rank":21278,"connectedness_rank":24158,"active_engaged_rank":18403,"lsoa_total":6,"lsoa_critical":0,"lsoa_priority":0,"lsoa_support":6},{"msoa_code":"E02002387","neighbourhood_name":"Farnley East","local_authority":"Leeds","bad_health_pct":8.5,"bad_health_pct_percentile":79,"no_qualifications_pct":27.5,"no_qualifications_pct_percentile":83,"level4_plus_pct":18.2,"level4_plus_pct_percentile":82,"unemployed_count_percentile":74,"inactive_count_percentile":71,"employed_count_percentile":73,"deprived_pct":62.2,"deprived_pct_percentile":81,"owned_pct":52.5,"owned_pct_percentile":65,"social_rented_pct":32.8,"social_rented_pct_percentile":79,"Index of Multiple Deprivation (IMD) Score":43.5,"Income Score (rate)":0.22,"Employment Score (rate)":0.18,"Education, Skills and Training Score":40.2,"Health Deprivation and Disability Score":0.95,"Crime Score":0.42,"Barriers to Housing and Services Score":22.5,"Living Environment Score":26.2,"hlnm_growth":27.95,"hlnm_energy":33.56,"hlnm_crime":2670,"hlnm_opportunity":27.04,"hlnm_health":43.93,"hlnm_growth_percentile":71.2,"hlnm_energy_percentile":81.4,"hlnm_crime_percentile":97.4,"hlnm_opportunity_percentile":69,"hlnm_health_percentile":88.2,"civic_assets_rank":21047,"connectedness_rank":8786,"active_engaged_rank":8257,"lsoa_total":4,"lsoa_critical":0,"lsoa_priority":4,"lsoa_support":0},{"msoa_code":"E02002388","neighbourhood_name":"Armley & New Wortley","local_authority":"Leeds","bad_health_pct":9.5,"bad_health_pct_percentile":84,"no_qualifications_pct":30.5,"no_qualifications_pct_percentile":87,"level4_plus_pct":19.8,"level4_plus_pct_percentile":79,"unemployed_count_percentile":81,"inactive_count_percentile":78,"employed_count_percentile":79,"deprived_pct":69.5,"deprived_pct_percentile":87,"owned_pct":38.2,"owned_pct_percentile":75,"social_rented_pct":42.5,"social_rented_pct_percentile":88,"Index of Multiple Deprivation (IMD) Score":52.8,"Income Score (rate)":0.28,"Employment Score (rate)":0.24,"Education, Skills and Training Score":48.8,"Health Deprivation and Disability Score":1.22,"Crime Score":0.68,"Barriers to Housing and Services Score":14.5,"Living Environment Score":38.2,"hlnm_growth":29.01,"hlnm_energy":19.68,"hlnm_crime":3031,"hlnm_opportunity":26.62,"hlnm_health":32.65,"hlnm_growth_percentile":72.7,"hlnm_energy_percentile":54.7,"hlnm_crime_percentile":96.6,"hlnm_opportunity_percentile":68.4,"hlnm_health_percentile":78.3,"civic_assets_rank":23138,"connectedness_rank":10842,"active_engaged_rank":7578,"lsoa_total":5,"lsoa_critical":0,"lsoa_priority":3,"lsoa_support":2},{"msoa_code":"E02002651","neighbourhood_name":"Orchard Park","local_authority":"Kingston upon Hull, City of","bad_health_pct":10.2,"bad_health_pct_percentile":87,"no_qualifications_pct":34.5,"no_qualifications_pct_percentile":91,"level4_plus_pct":11.2,"level4_plus_pct_percentile":92,"unemployed_count_percentile":86,"inactive_count_percentile":83,"employed_count_percentile":84,"deprived_pct":75.2,"deprived_pct_percentile":91,"owned_pct":32.5,"owned_pct_percentile":80,"social_rented_pct":55.2,"social_rented_pct_percentile":94,"Index of Multiple Deprivation (IMD) Score":62.2,"Income Score (rate)":0.35,"Employment Score (rate)":0.30,"Education, Skills and Training Score":58.2,"Health Deprivation and Disability Score":1.52,"Crime Score":0.78,"Barriers to Housing and Services Score":11.5,"Living Environment Score":35.5,"hlnm_growth":30.00,"hlnm_energy":25.98,"hlnm_crime":15369,"hlnm_opportunity":81.67,"hlnm_health":42.38,"hlnm_growth_percentile":73.9,"hlnm_energy_percentile":69.7,"hlnm_crime_percentile":56.2,"hlnm_opportunity_percentile":99,"hlnm_health_percentile":87.2,"civic_assets_rank":4852,"connectedness_rank":12671,"active_engaged_rank":10038,"lsoa_total":5,"lsoa_critical":1,"lsoa_priority":2,"lsoa_support":2},{"msoa_code":"E02002652","neighbourhood_name":"Greatfield","local_authority":"Kingston upon Hull, City of","bad_health_pct":9.8,"bad_health_pct_percentile":85,"no_qualifications_pct":33.2,"no_qualifications_pct_percentile":90,"level4_plus_pct":12.8,"level4_plus_pct_percentile":90,"unemployed_count_percentile":84,"inactive_count_percentile":81,"employed_count_percentile":82,"deprived_pct":73.5,"deprived_pct_percentile":90,"owned_pct":35.8,"owned_pct_percentile":76,"social_rented_pct":52.8,"social_rented_pct_percentile":93,"Index of Multiple Deprivation (IMD) Score":59.5,"Income Score (rate)":0.33,"Employment Score (rate)":0.28,"Education, Skills and Training Score":55.5,"Health Deprivation and Disability Score":1.45,"Crime Score":0.72,"Barriers to Housing and Services Score":13.2,"Living Environment Score":34.2,"lsoa_total":0,"lsoa_critical":0,"lsoa_priority":0,"lsoa_support":0},{"msoa_code":"E02002653","neighbourhood_name":"Boulevard & St Andrew's Quay","local_authority":"Kingston upon Hull, City of","bad_health_pct":9.5,"bad_health_pct_percentile":84,"no_qualifications_pct":31.8,"no_qualifications_pct_percentile":88,"level4_plus_pct":14.5,"level4_plus_pct_percentile":88,"unemployed_count_percentile":82,"inactive_count_percentile":79,"employed_count_percentile":80,"deprived_pct":70.8,"deprived_pct_percentile":88,"owned_pct":38.5,"owned_pct_percentile":74,"social_rented_pct":48.5,"social_rented_pct_percentile":91,"Index of Multiple Deprivation (IMD) Score":55.8,"Income Score (rate)":0.30,"Employment Score (rate)":0.26,"Education, Skills and Training Score":52.2,"Health Deprivation and Disability Score":1.35,"Crime Score":0.65,"Barriers to Housing and Services Score":15.5,"Living Environment Score":38.8,"hlnm_growth":86.43,"hlnm_energy":9.80,"hlnm_crime":856,"hlnm_opportunity":52.49,"hlnm_health":79.08,"hlnm_growth_percentile":99.8,"hlnm_energy_percentile":23.4,"hlnm_crime_percentile":99.5,"hlnm_opportunity_percentile":91.5,"hlnm_health_percentile":99,"civic_assets_rank":12282,"connectedness_rank":2739,"active_engaged_rank":393,"lsoa_total":6,"lsoa_critical":0,"lsoa_priority":0,"lsoa_support":0},{"msoa_code":"E02001305","neighbourhood_name":"Birkenhead Central","local_authority":"Wirral","bad_health_pct":10.5,"bad_health_pct_percentile":88,"no_qualifications_pct":32.8,"no_qualifications_pct_percentile":89,"level4_plus_pct":18.5,"level4_plus_pct_percentile":81,"unemployed_count_percentile":85,"inactive_count_percentile":82,"employed_count_percentile":83,"deprived_pct":74.2,"deprived_pct_percentile":91,"owned_pct":28.2,"owned_pct_percentile":82,"social_rented_pct":48.2,"social_rented_pct_percentile":91,"Index of Multiple Deprivation (IMD) Score":61.2,"Income Score (rate)":0.34,"Employment Score (rate)":0.29,"Education, Skills and Training Score":50.5,"Health Deprivation and Disability Score":1.52,"Crime Score":0.88,"Barriers to Housing and Services Score":12.2,"Living Environment Score":42.5,"hlnm_growth":12.43,"hlnm_energy":14.06,"hlnm_crime":19042,"hlnm_opportunity":14.91,"hlnm_health":32.49,"hlnm_growth_percentile":37.5,"hlnm_energy_percentile":37.9,"hlnm_crime_percentile":42.8,"hlnm_opportunity_percentile":47.3,"hlnm_health_percentile":78.1,"civic_assets_rank":1331,"connectedness_rank":22888,"active_engaged_rank":5378,"lsoa_total":5,"lsoa_critical":0,"lsoa_priority":0,"lsoa_support":5},{"msoa_code":"E02001306","neighbourhood_name":"Seacombe","local_authority":"Wirral","bad_health_pct":9.8,"bad_health_pct_percentile":85,"no_qualifications_pct":30.2,"no_qualifications_pct_percentile":87,"level4_plus_pct":16.2,"level4_plus_pct_percentile":85,"unemployed_count_percentile":82,"inactive_count_percentile":79,"employed_count_percentile":80,"deprived_pct":70.5,"deprived_pct_percentile":88,"owned_pct":42.5,"owned_pct_percentile":71,"social_rented_pct":42.2,"social_rented_pct_percentile":87,"Index of Multiple Deprivation (IMD) Score":54.5,"Income Score (rate)":0.29,"Employment Score (rate)":0.25,"Education, Skills and Training Score":48.2,"Health Deprivation and Disability Score":1.32,"Crime Score":0.62,"Barriers to Housing and Services Score":16.8,"Living Environment Score":35.8,"hlnm_growth":22.25,"hlnm_energy":12.89,"hlnm_crime":19615,"hlnm_opportunity":16.79,"hlnm_health":15.18,"hlnm_growth_percentile":61.4,"hlnm_energy_percentile":33.7,"hlnm_crime_percentile":40.5,"hlnm_opportunity_percentile":51.5,"hlnm_health_percentile":45.4,"civic_assets_rank":2540,"connectedness_rank":23990,"active_engaged_rank":10091,"lsoa_total":5,"lsoa_critical":0,"lsoa_priority":0,"lsoa_support":5},{"msoa_code":"E02001307","neighbourhood_name":"Woodchurch","local_authority":"Wirral","bad_health_pct":8.8,"bad_health_pct_percentile":80,"no_qualifications_pct":28.5,"no_qualifications_pct_percentile":85,"level4_plus_pct":17.8,"level4_plus_pct_percentile":83,"unemployed_count_percentile":76,"inactive_count_percentile":73,"employed_count_percentile":74,"deprived_pct":64.5,"deprived_pct_percentile":83,"owned_pct":55.2,"owned_pct_percentile":63,"social_rented_pct":32.5,"social_rented_pct_percentile":79,"Index of Multiple Deprivation (IMD) Score":46.8,"Income Score (rate)":0.24,"Employment Score (rate)":0.20,"Education, Skills and Training Score":42.8,"Health Deprivation and Disability Score":1.02,"Crime Score":0.45,"Barriers to Housing and Services Score":20.5,"Living Environment Score":28.2,"hlnm_growth":5.78,"hlnm_energy":10.15,"hlnm_crime":27092,"hlnm_opportunity":9.67,"hlnm_health":7.14,"hlnm_growth_percentile":15.5,"hlnm_energy_percentile":24.4,"hlnm_crime_percentile":11.700000000000003,"hlnm_opportunity_percentile":33.2,"hlnm_health_percentile":20.5,"civic_assets_rank":5872,"connectedness_rank":28323,"active_engaged_rank":9922,"lsoa_total":7,"lsoa_critical":0,"lsoa_priority":0,"lsoa_support":7},{"msoa_code":"E02004205","neighbourhood_name":"Peterlee East","local_authority":"County Durham","bad_health_pct":10.8,"bad_health_pct_percentile":89,"no_qualifications_pct":35.5,"no_qualifications_pct_percentile":92,"level4_plus_pct":10.5,"level4_plus_pct_percentile":93,"unemployed_count_percentile":85,"inactive_count_percentile":86,"employed_count_percentile":85,"deprived_pct":76.5,"deprived_pct_percentile":92,"owned_pct":48.5,"owned_pct_percentile":68,"social_rented_pct":38.2,"social_rented_pct_percentile":85,"Index of Multiple Deprivation (IMD) Score":58.8,"Income Score (rate)":0.32,"Employment Score (rate)":0.30,"Education, Skills and Training Score":56.2,"Health Deprivation and Disability Score":1.65,"Crime Score":0.52,"Barriers to Housing and Services Score":25.5,"Living Environment Score":22.5,"hlnm_growth":35.02,"hlnm_energy":14.27,"hlnm_crime":19942,"hlnm_opportunity":29.45,"hlnm_health":19.50,"hlnm_growth_percentile":80,"hlnm_energy_percentile":38.7,"hlnm_crime_percentile":39.4,"hlnm_opportunity_percentile":72.6,"hlnm_health_percentile":56.6,"civic_assets_rank":11329,"connectedness_rank":2884,"active_engaged_rank":22114,"lsoa_total":5,"lsoa_critical":0,"lsoa_priority":0,"lsoa_support":5},{"msoa_code":"E02004206","neighbourhood_name":"Stanley South","local_authority":"County Durham","bad_health_pct":10.2,"bad_health_pct_percentile":87,"no_qualifications_pct":33.8,"no_qualifications_pct_percentile":90,"level4_plus_pct":12.2,"level4_plus_pct_percentile":91,"unemployed_count_percentile":83,"inactive_count_percentile":84,"employed_count_percentile":83,"deprived_pct":74.2,"deprived_pct_percentile":91,"owned_pct":52.2,"owned_pct_percentile":65,"social_rented_pct":35.5,"social_rented_pct_percentile":82,"Index of Multiple Deprivation (IMD) Score":55.5,"Income Score (rate)":0.30,"Employment Score (rate)":0.28,"Education, Skills and Training Score":53.5,"Health Deprivation and Disability Score":1.55,"Crime Score":0.48,"Barriers to Housing and Services Score":28.2,"Living Environment Score":20.5,"hlnm_growth":48.35,"hlnm_energy":22.56,"hlnm_crime":22680,"hlnm_opportunity":29.23,"hlnm_health":40.56,"hlnm_growth_percentile":91.2,"hlnm_energy_percentile":62.5,"hlnm_crime_percentile":28.5,"hlnm_opportunity_percentile":72.3,"hlnm_health_percentile":86,"civic_assets_rank":9224,"connectedness_rank":1364,"active_engaged_rank":25181,"lsoa_total":4,"lsoa_critical":0,"lsoa_priority":1,"lsoa_support":3},{"msoa_code":"E02004207","neighbourhood_name":"Crook North & Tow Law","local_authority":"County Durham","bad_health_pct":9.5,"bad_health_pct_percentile":84,"no_qualifications_pct":31.2,"no_qualifications_pct_percentile":88,"level4_plus_pct":14.5,"level4_plus_pct_percentile":88,"unemployed_count_percentile":79,"inactive_count_percentile":80,"employed_count_percentile":79,"deprived_pct":70.2,"deprived_pct_percentile":88,"owned_pct":58.5,"owned_pct_percentile":60,"social_rented_pct":28.2,"social_rented_pct_percentile":74,"Index of Multiple Deprivation (IMD) Score":50.2,"Income Score (rate)":0.26,"Employment Score (rate)":0.24,"Education, Skills and Training Score":48.8,"Health Deprivation and Disability Score":1.38,"Crime Score":0.35,"Barriers to Housing and Services Score":35.5,"Living Environment Score":18.5,"hlnm_growth":31.97,"hlnm_energy":33.82,"hlnm_crime":29023,"hlnm_opportunity":20.19,"hlnm_health":17.41,"hlnm_growth_percentile":76.6,"hlnm_energy_percentile":81.7,"hlnm_crime_percentile":5.5999999999999943,"hlnm_opportunity_percentile":57.8,"hlnm_health_percentile":51.8,"civic_assets_rank":13509,"connectedness_rank":5270,"active_engaged_rank":24705,"lsoa_total":4,"lsoa_critical":0,"lsoa_priority":0,"lsoa_support":4},{"msoa_code":"E02005355","neighbourhood_name":"Eyres Monsell","local_authority":"Leicester","bad_health_pct":9.2,"bad_health_pct_percentile":83,"no_qualifications_pct":30.5,"no_qualifications_pct_percentile":87,"level4_plus_pct":15.8,"level4_plus_pct_percentile":86,"unemployed_count_percentile":80,"inactive_count_percentile":77,"employed_count_percentile":78,"deprived_pct":68.8,"deprived_pct_percentile":86,"owned_pct":45.2,"owned_pct_percentile":70,"social_rented_pct":42.5,"social_rented_pct_percentile":88,"Index of Multiple Deprivation (IMD) Score":52.5,"Income Score (rate)":0.28,"Employment Score (rate)":0.23,"Education, Skills and Training Score":49.2,"Health Deprivation and Disability Score":1.18,"Crime Score":0.58,"Barriers to Housing and Services Score":16.5,"Living Environment Score":32.8,"hlnm_growth":12.63,"hlnm_energy":25.65,"hlnm_crime":15573,"hlnm_opportunity":7.69,"hlnm_health":5.09,"hlnm_growth_percentile":38.1,"hlnm_energy_percentile":69,"hlnm_crime_percentile":55.4,"hlnm_opportunity_percentile":27.2,"hlnm_health_percentile":13.9,"civic_assets_rank":18614,"connectedness_rank":22778,"active_engaged_rank":19999,"lsoa_total":4,"lsoa_critical":0,"lsoa_priority":0,"lsoa_support":4},{"msoa_code":"E02005356","neighbourhood_name":"Braunstone Park West","local_authority":"Leicester","bad_health_pct":9.8,"bad_health_pct_percentile":85,"no_qualifications_pct":32.2,"no_qualifications_pct_percentile":89,"level4_plus_pct":14.2,"level4_plus_pct_percentile":88,"unemployed_count_percentile":83,"inactive_count_percentile":80,"employed_count_percentile":81,"deprived_pct":72.2,"deprived_pct_percentile":89,"owned_pct":38.5,"owned_pct_percentile":74,"social_rented_pct":48.8,"social_rented_pct_percentile":91,"Index of Multiple Deprivation (IMD) Score":57.2,"Income Score (rate)":0.31,"Employment Score (rate)":0.26,"Education, Skills and Training Score":53.2,"Health Deprivation and Disability Score":1.32,"Crime Score":0.68,"Barriers to Housing and Services Score":14.2,"Living Environment Score":36.5,"hlnm_growth":4.32,"hlnm_energy":21.76,"hlnm_crime":17600,"hlnm_opportunity":4.56,"hlnm_health":3.02,"hlnm_growth_percentile":10.3,"hlnm_energy_percentile":60.6,"hlnm_crime_percentile":48.3,"hlnm_opportunity_percentile":16.3,"hlnm_health_percentile":8,"civic_assets_rank":17399,"connectedness_rank":25421,"active_engaged_rank":27697,"lsoa_total":4,"lsoa_critical":0,"lsoa_priority":0,"lsoa_support":4},{"msoa_code":"E02005357","neighbourhood_name":"Thurnby Lodge","local_authority":"Leicester","bad_health_pct":8.5,"bad_health_pct_percentile":79,"no_qualifications_pct":28.8,"no_qualifications_pct_percentile":85,"level4_plus_pct":17.5,"level4_plus_pct_percentile":83,"unemployed_count_percentile":76,"inactive_count_percentile":73,"employed_count_percentile":74,"deprived_pct":64.5,"deprived_pct_percentile":83,"owned_pct":52.8,"owned_pct_percentile":64,"social_rented_pct":35.2,"social_rented_pct_percentile":82,"Index of Multiple Deprivation (IMD) Score":46.5,"Income Score (rate)":0.24,"Employment Score (rate)":0.20,"Education, Skills and Training Score":44.5,"Health Deprivation and Disability Score":1.02,"Crime Score":0.48,"Barriers to Housing and Services Score":19.8,"Living Environment Score":28.8,"hlnm_growth":18.56,"hlnm_energy":11.27,"hlnm_crime":13297,"hlnm_opportunity":14.20,"hlnm_health":4.46,"hlnm_growth_percentile":53.4,"hlnm_energy_percentile":28.3,"hlnm_crime_percentile":63.7,"hlnm_opportunity_percentile":45.4,"hlnm_health_percentile":12,"civic_assets_rank":3405,"connectedness_rank":21997,"active_engaged_rank":12014,"lsoa_total":4,"lsoa_critical":0,"lsoa_priority":0,"lsoa_support":4},{"msoa_code":"E02005440","neighbourhood_name":"Corby Kingswood","local_authority":"North Northamptonshire","bad_health_pct":9.5,"bad_health_pct_percentile":84,"no_qualifications_pct":29.8,"no_qualifications_pct_percentile":86,"level4_plus_pct":15.2,"level4_plus_pct_percentile":87,"unemployed_count_percentile":78,"inactive_count_percentile":75,"employed_count_percentile":76,"deprived_pct":67.5,"deprived_pct_percentile":85,"owned_pct":55.8,"owned_pct_percentile":62,"social_rented_pct":32.2,"social_rented_pct_percentile":79,"Index of Multiple Deprivation (IMD) Score":48.8,"Income Score (rate)":0.25,"Employment Score (rate)":0.21,"Education, Skills and Training Score":46.2,"Health Deprivation and Disability Score":1.15,"Crime Score":0.52,"Barriers to Housing and Services Score":18.5,"Living Environment Score":30.2,"hlnm_growth":72.60,"hlnm_energy":67.40,"hlnm_crime":17738,"hlnm_opportunity":95.33,"hlnm_health":76.97,"hlnm_growth_percentile":99,"hlnm_energy_percentile":98.3,"hlnm_crime_percentile":47.7,"hlnm_opportunity_percentile":99.9,"hlnm_health_percentile":98.7,"civic_assets_rank":5207,"connectedness_rank":2228,"active_engaged_rank":28273,"lsoa_total":4,"lsoa_critical":3,"lsoa_priority":1,"lsoa_support":0},{"msoa_code":"E02005441","neighbourhood_name":"Queensway","local_authority":"North Northamptonshire","bad_health_pct":8.8,"bad_health_pct_percentile":80,"no_qualifications_pct":28.2,"no_qualifications_pct_percentile":84,"level4_plus_pct":16.8,"level4_plus_pct_percentile":84,"unemployed_count_percentile":75,"inactive_count_percentile":72,"employed_count_percentile":73,"deprived_pct":63.8,"deprived_pct_percentile":82,"owned_pct":58.2,"owned_pct_percentile":60,"social_rented_pct":28.8,"social_rented_pct_percentile":75,"Index of Multiple Deprivation (IMD) Score":44.2,"Income Score (rate)":0.22,"Employment Score (rate)":0.18,"Education, Skills and Training Score":42.5,"Health Deprivation and Disability Score":0.98,"Crime Score":0.45,"Barriers to Housing and Services Score":21.2,"Living Environment Score":26.5,"hlnm_growth":44.32,"hlnm_energy":56.98,"hlnm_crime":23985,"hlnm_opportunity":63.00,"hlnm_health":31.21,"hlnm_growth_percentile":88.4,"hlnm_energy_percentile":96,"hlnm_crime_percentile":23.700000000000003,"hlnm_opportunity_percentile":95.4,"hlnm_health_percentile":76.6,"civic_assets_rank":3016,"connectedness_rank":1727,"active_engaged_rank":31018,"lsoa_total":4,"lsoa_critical":0,"lsoa_priority":0,"lsoa_support":0},{"msoa_code":"E02005442","neighbourhood_name":"Kettering Avondale Grange","local_authority":"North Northamptonshire","bad_health_pct":8.2,"bad_health_pct_percentile":78,"no_qualifications_pct":26.5,"no_qualifications_pct_percentile":82,"level4_plus_pct":18.5,"level4_plus_pct_percentile":81,"unemployed_count_percentile":72,"inactive_count_percentile":69,"employed_count_percentile":70,"deprived_pct":60.2,"deprived_pct_percentile":79,"owned_pct":62.5,"owned_pct_percentile":56,"social_rented_pct":25.2,"social_rented_pct_percentile":72,"Index of Multiple Deprivation (IMD) Score":40.5,"Income Score (rate)":0.20,"Employment Score (rate)":0.16,"Education, Skills and Training Score":38.8,"Health Deprivation and Disability Score":0.85,"Crime Score":0.38,"Barriers to Housing and Services Score":24.5,"Living Environment Score":24.2,"hlnm_growth":71.65,"hlnm_energy":2.90,"hlnm_crime":2562,"hlnm_opportunity":78.44,"hlnm_health":61.74,"hlnm_growth_percentile":98.9,"hlnm_energy_percentile":4.3,"hlnm_crime_percentile":97.6,"hlnm_opportunity_percentile":98.7,"hlnm_health_percentile":96,"civic_assets_rank":8034,"connectedness_rank":4941,"active_engaged_rank":2364,"lsoa_total":4,"lsoa_critical":0,"lsoa_priority":4,"lsoa_support":0},{"msoa_code":"E02006855","neighbourhood_name":"Hartcliffe","local_authority":"Bristol, City of","bad_health_pct":9.2,"bad_health_pct_percentile":83,"no_qualifications_pct":29.5,"no_qualifications_pct_percentile":86,"level4_plus_pct":16.2,"level4_plus_pct_percentile":85,"unemployed_count_percentile":79,"inactive_count_percentile":76,"employed_count_percentile":77,"deprived_pct":67.2,"deprived_pct_percentile":85,"owned_pct":42.5,"owned_pct_percentile":71,"social_rented_pct":45.2,"social_rented_pct_percentile":89,"Index of Multiple Deprivation (IMD) Score":50.8,"Income Score (rate)":0.27,"Employment Score (rate)":0.22,"Education, Skills and Training Score":47.5,"Health Deprivation and Disability Score":1.12,"Crime Score":0.55,"Barriers to Housing and Services Score":15.8,"Living Environment Score":32.5,"hlnm_growth":23.93,"hlnm_energy":14.37,"hlnm_crime":6914,"hlnm_opportunity":16.38,"hlnm_health":28.00,"hlnm_growth_percentile":64.4,"hlnm_energy_percentile":38.9,"hlnm_crime_percentile":86.4,"hlnm_opportunity_percentile":50.7,"hlnm_health_percentile":72,"civic_assets_rank":32211,"connectedness_rank":12610,"active_engaged_rank":18328,"lsoa_total":4,"lsoa_critical":0,"lsoa_priority":1,"lsoa_support":3},{"msoa_code":"E02006502","neighbourhood_name":"Whitehawk","local_authority":"Brighton and Hove","bad_health_pct":9.8,"bad_health_pct_percentile":85,"no_qualifications_pct":28.2,"no_qualifications_pct_percentile":84,"level4_plus_pct":22.5,"level4_plus_pct_percentile":74,"unemployed_count_percentile":80,"inactive_count_percentile":77,"employed_count_percentile":78,"deprived_pct":65.8,"deprived_pct_percentile":84,"owned_pct":32.2,"owned_pct_percentile":80,"social_rented_pct":52.5,"social_rented_pct_percentile":93,"Index of Multiple Deprivation (IMD) Score":52.2,"Income Score (rate)":0.28,"Employment Score (rate)":0.23,"Education, Skills and Training Score":42.2,"Health Deprivation and Disability Score":1.25,"Crime Score":0.72,"Barriers to Housing and Services Score":12.5,"Living Environment Score":38.2,"hlnm_growth":13.44,"hlnm_energy":21.60,"hlnm_crime":25020,"hlnm_opportunity":13.96,"hlnm_health":21.26,"hlnm_growth_percentile":40.5,"hlnm_energy_percentile":60.1,"hlnm_crime_percentile":19.700000000000003,"hlnm_opportunity_percentile":44.7,"hlnm_health_percentile":60.4,"civic_assets_rank":13043,"connectedness_rank":19609,"active_engaged_rank":21905,"lsoa_total":7,"lsoa_critical":0,"lsoa_priority":0,"lsoa_support":7},{"msoa_code":"E02003505","neighbourhood_name":"Penhill","local_authority":"Swindon","bad_health_pct":8.5,"bad_health_pct_percentile":79,"no_qualifications_pct":27.8,"no_qualifications_pct_percentile":84,"level4_plus_pct":17.2,"level4_plus_pct_percentile":83,"unemployed_count_percentile":75,"inactive_count_percentile":72,"employed_count_percentile":73,"deprived_pct":62.8,"deprived_pct_percentile":81,"owned_pct":52.5,"owned_pct_percentile":65,"social_rented_pct":35.8,"social_rented_pct_percentile":82,"Index of Multiple Deprivation (IMD) Score":45.2,"Income Score (rate)":0.23,"Employment Score (rate)":0.19,"Education, Skills and Training Score":43.2,"Health Deprivation and Disability Score":0.98,"Crime Score":0.45,"Barriers to Housing and Services Score":20.2,"Living Environment Score":28.5,"hlnm_growth":6.19,"hlnm_energy":18.40,"hlnm_crime":15235,"hlnm_opportunity":6.60,"hlnm_health":2.53,"hlnm_growth_percentile":17,"hlnm_energy_percentile":51,"hlnm_crime_percentile":56.7,"hlnm_opportunity_percentile":23.7,"hlnm_health_percentile":6.5,"civic_assets_rank":32137,"connectedness_rank":17538,"active_engaged_rank":20936,"lsoa_total":5,"lsoa_critical":0,"lsoa_priority":0,"lsoa_support":5},{"msoa_code":"E02003506","neighbourhood_name":"Walcot East","local_authority":"Swindon","bad_health_pct":9.2,"bad_health_pct_percentile":83,"no_qualifications_pct":30.2,"no_qualifications_pct_percentile":87,"level4_plus_pct":18.8,"level4_plus_pct_percentile":80,"unemployed_count_percentile":79,"inactive_count_percentile":76,"employed_count_percentile":77,"deprived_pct":66.5,"deprived_pct_percentile":85,"owned_pct":42.8,"owned_pct_percentile":71,"social_rented_pct":38.5,"social_rented_pct_percentile":85,"Index of Multiple Deprivation (IMD) Score":49.8,"Income Score (rate)":0.26,"Employment Score (rate)":0.22,"Education, Skills and Training Score":46.8,"Health Deprivation and Disability Score":1.12,"Crime Score":0.58,"Barriers to Housing and Services Score":16.8,"Living Environment Score":34.2,"hlnm_growth":5.12,"hlnm_energy":20.55,"hlnm_crime":19241,"hlnm_opportunity":6.03,"hlnm_health":13.28,"hlnm_growth_percentile":12.9,"hlnm_energy_percentile":57.2,"hlnm_crime_percentile":42.1,"hlnm_opportunity_percentile":21.6,"hlnm_health_percentile":40,"civic_assets_rank":30235,"connectedness_rank":21948,"active_engaged_rank":28572,"lsoa_total":4,"lsoa_critical":0,"lsoa_priority":0,"lsoa_support":4},{"msoa_code":"E02006545","neighbourhood_name":"Wick & Toddington","local_authority":"Arun","bad_health_pct":8.8,"bad_health_pct_percentile":80,"no_qualifications_pct":26.8,"no_qualifications_pct_percentile":83,"level4_plus_pct":19.5,"level4_plus_pct_percentile":79,"unemployed_count_percentile":74,"inactive_count_percentile":75,"employed_count_percentile":74,"deprived_pct":61.5,"deprived_pct_percentile":80,"owned_pct":62.5,"owned_pct_percentile":56,"social_rented_pct":22.8,"social_rented_pct_percentile":69,"Index of Multiple Deprivation (IMD) Score":42.2,"Income Score (rate)":0.21,"Employment Score (rate)":0.18,"Education, Skills and Training Score":38.5,"Health Deprivation and Disability Score":0.92,"Crime Score":0.35,"Barriers to Housing and Services Score":32.5,"Living Environment Score":22.8,"hlnm_growth":34.37,"hlnm_energy":7.53,"hlnm_crime":13249,"hlnm_opportunity":47.72,"hlnm_health":28.83,"hlnm_growth_percentile":79.2,"hlnm_energy_percentile":15.9,"hlnm_crime_percentile":63.9,"hlnm_opportunity_percentile":89.1,"hlnm_health_percentile":73.3,"civic_assets_rank":3335,"connectedness_rank":6993,"active_engaged_rank":2237,"lsoa_total":7,"lsoa_critical":0,"lsoa_priority":3,"lsoa_support":4}]};
+
+        let allAreas = [];
+        let currentArea = null;
+        let map = null;
+
+        // Helper functions
+        function getNeedClass(percentile) {
+            if (percentile >= 80) return 'critical';
+            if (percentile >= 60) return 'high';
+            if (percentile >= 40) return 'moderate';
+            return 'low';
+        }
+
+        function getNeedColor(percentile) {
+            if (percentile >= 80) return '#DC3545';
+            if (percentile >= 60) return '#F97316';
+            if (percentile >= 40) return '#F59E0B';
+            if (percentile >= 20) return '#84CC16';
+            return '#10B981';
+        }
+
+        function getLSOAColor(type) {
+            if (type === 'critical') return '#DC3545';
+            if (type === 'priority') return '#F97316';
+            if (type === 'support') return '#F59E0B';
+            return '#94A3B8';
+        }
+
+        // Generate intelligent narrative
+        function generateOverviewNarrative(area) {
+            const growthLevel = area.hlnm_growth_percentile >= 80 ? 'acute' : area.hlnm_growth_percentile >= 60 ? 'significant' : 'moderate';
+            const healthLevel = area.hlnm_health_percentile >= 80 ? 'pronounced' : area.hlnm_health_percentile >= 60 ? 'notable' : 'measurable';
+
+            const narrative = `<strong>${area.neighbourhood_name}</strong> in <strong>${area.local_authority}</strong> presents a complex socioeconomic profile. The neighbourhood demonstrates <strong>${growthLevel} economic growth needs</strong>, ranking in the <strong>${Math.round(area.hlnm_growth_percentile)}th percentile</strong> nationally. Health challenges are <strong>${healthLevel}</strong>, with the area positioned in the <strong>${Math.round(area.hlnm_health_percentile)}th percentile</strong> for health-related need. `;
+
+            const imdContext = area['Index of Multiple Deprivation (IMD) Score'] >= 50 ?
+                `With an overall IMD score of <strong>${area['Index of Multiple Deprivation (IMD) Score'].toFixed(1)}</strong>, this neighbourhood experiences significant multidimensional deprivation.` :
+                `The overall IMD score of <strong>${area['Index of Multiple Deprivation (IMD) Score'].toFixed(1)}</strong> indicates moderate levels of deprivation across multiple domains.`;
+
+            return narrative + imdContext;
+        }
+
+        // Generate mission narrative
+        function generateMissionNarrative(missionName, area, percentile) {
+            const narratives = {
+                'growth': `This neighbourhood faces considerable economic challenges. With <strong>${area.no_qualifications_pct?.toFixed(1)}%</strong> of residents lacking formal qualifications and unemployment levels in the <strong>${Math.round(area.unemployed_count_percentile)}th percentile</strong>, workforce development represents both a critical need and significant opportunity for community transformation.`,
+
+                'energy': `Energy efficiency and affordability present material concerns for local households. The energy need score of <strong>${area.hlnm_energy?.toFixed(1)}</strong> reflects challenges around fuel poverty, housing quality, and access to sustainable energy solutions that impact daily quality of life.`,
+
+                'crime': `Community safety dynamics reveal important patterns. With a crime rank of <strong>${area.hlnm_crime?.toLocaleString()}</strong> nationally and an IMD crime score of <strong>${area['Crime Score']?.toFixed(2)}</strong>, the neighbourhood experiences crime levels that shape residents' sense of security and wellbeing.`,
+
+                'opportunity': `Barriers to opportunity are multifaceted, encompassing education, skills, and access to services. Scoring <strong>${area.hlnm_opportunity?.toFixed(1)}</strong> on opportunity barriers, the area faces structural challenges that can limit social mobility and life chances for residents.`,
+
+                'health': `Health outcomes reflect the cumulative impact of socioeconomic factors. <strong>${area.bad_health_pct?.toFixed(1)}%</strong> of residents report poor health, positioning the neighbourhood in the <strong>${Math.round(area.bad_health_pct_percentile)}th percentile</strong> nationally—a pattern shaped by deprivation, environment, and access to healthcare.`
+            };
+
+            return narratives[missionName.toLowerCase()] || 'Detailed analysis of this mission area.';
+        }
+
+        // Search functionality
+        function handleSearch(query) {
+            const results = document.getElementById('search-results');
+
+            if (!query || query.length < 2) {
+                results.classList.remove('active');
+                return;
+            }
+
+            const term = query.toLowerCase();
+            const matches = allAreas.filter(a => {
+                return (a.neighbourhood_name || '').toLowerCase().includes(term) ||
+                       (a.local_authority || '').toLowerCase().includes(term) ||
+                       a.msoa_code.toLowerCase().includes(term);
+            });
+
+            if (matches.length === 0) {
+                results.innerHTML = '<div class="search-result" style="cursor: default;"><div class="result-name no-data">No matches found</div></div>';
+            } else {
+                results.innerHTML = matches.slice(0, 8).map(area => `
+                    <div class="search-result" data-msoa="${area.msoa_code}">
+                        <div class="result-name">${area.neighbourhood_name || area.msoa_code}</div>
+                        <div class="result-meta">${area.local_authority} • ${area.msoa_code}</div>
+                    </div>
+                `).join('');
+
+                results.querySelectorAll('.search-result').forEach(el => {
+                    el.addEventListener('click', function() {
+                        const msoa = this.dataset.msoa;
+                        const area = allAreas.find(a => a.msoa_code === msoa);
+                        if (area) {
+                            displayArea(area);
+                            document.getElementById('area-search').value = area.neighbourhood_name || area.msoa_code;
+                            results.classList.remove('active');
+                        }
+                    });
+                });
+            }
+
+            results.classList.add('active');
+        }
+
+        // Display area
+        function displayArea(area) {
+            currentArea = area;
+            document.getElementById('dashboard').classList.add('active');
+
+            // Header
+            document.getElementById('area-name').textContent = area.neighbourhood_name || area.msoa_code;
+            document.getElementById('area-meta').textContent = `${area.local_authority} • ${area.msoa_code} • ${area.lsoa_total || 0} constituent LSOAs`;
+
+            // Overview narrative
+            document.getElementById('overview-narrative').innerHTML = generateOverviewNarrative(area);
+
+            // Overview cards
+            renderOverviewCards(area);
+
+            // Map
+            renderMap(area);
+
+            // Missions
+            renderMissions(area);
+
+            // IMD
+            renderIMD(area);
+
+            // Scroll
+            setTimeout(() => {
+                document.getElementById('dashboard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
+
+        // Render overview cards
+        function renderOverviewCards(area) {
+            const container = document.getElementById('overview-grid');
+            const totalMSOAs = 33755;
+
+            const cards = [
+                // HLNM Indicators (5 total)
+                {
+                    label: 'Economic Growth Need',
+                    value: Math.round(area.hlnm_growth_percentile),
+                    class: getNeedClass(area.hlnm_growth_percentile),
+                    description: `Positioned in the <strong>${Math.round(area.hlnm_growth_percentile)}th percentile</strong> for economic growth challenges nationally, reflecting workforce skills gaps and employment barriers.`
+                },
+                {
+                    label: 'Energy Need',
+                    value: Math.round(area.hlnm_energy_percentile),
+                    class: getNeedClass(area.hlnm_energy_percentile),
+                    description: `Ranks in the <strong>${Math.round(area.hlnm_energy_percentile)}th percentile</strong> for energy poverty and housing efficiency challenges across England.`
+                },
+                {
+                    label: 'Crime & Safety Need',
+                    value: Math.round(area.hlnm_crime_percentile),
+                    class: getNeedClass(area.hlnm_crime_percentile),
+                    description: `Community safety metrics place this area in the <strong>${Math.round(area.hlnm_crime_percentile)}th percentile</strong> for crime and anti-social behaviour concerns.`
+                },
+                {
+                    label: 'Opportunity Need',
+                    value: Math.round(area.hlnm_opportunity_percentile),
+                    class: getNeedClass(area.hlnm_opportunity_percentile),
+                    description: `Positioned in the <strong>${Math.round(area.hlnm_opportunity_percentile)}th percentile</strong> for access to opportunity and social mobility challenges.`
+                },
+                {
+                    label: 'Health Need',
+                    value: Math.round(area.hlnm_health_percentile),
+                    class: getNeedClass(area.hlnm_health_percentile),
+                    description: `Health outcomes place this neighbourhood in the <strong>${Math.round(area.hlnm_health_percentile)}th percentile</strong>, shaped by deprivation, environment, and healthcare access.`
+                },
+                // CNI Indicators (3 total) - INVERTED: lower rank = better performance
+                {
+                    label: 'Civic Infrastructure',
+                    value: area.civic_assets_rank ? Math.round(100 - (area.civic_assets_rank / totalMSOAs) * 100) : null,
+                    class: area.civic_assets_rank ? getNeedClass(100 - (area.civic_assets_rank / totalMSOAs) * 100) : 'low',
+                    description: area.civic_assets_rank ? (() => {
+                        const percentile = Math.round(100 - (area.civic_assets_rank / totalMSOAs) * 100);
+                        const narrative = percentile >= 80 ? 'significant infrastructure gaps requiring investment' :
+                                        percentile >= 60 ? 'limited civic assets and infrastructure' :
+                                        percentile >= 40 ? 'moderate civic infrastructure present' :
+                                        percentile >= 20 ? 'strong civic assets supporting community life' :
+                                        'exceptional civic infrastructure with rich community assets';
+                        return `Positioned in the <strong>${percentile}th percentile</strong> nationally, reflecting ${narrative}.`;
+                    })() : 'No data available for civic assets ranking.'
+                },
+                {
+                    label: 'Community Connectedness',
+                    value: area.connectedness_rank ? Math.round(100 - (area.connectedness_rank / totalMSOAs) * 100) : null,
+                    class: area.connectedness_rank ? getNeedClass(100 - (area.connectedness_rank / totalMSOAs) * 100) : 'low',
+                    description: area.connectedness_rank ? (() => {
+                        const percentile = Math.round(100 - (area.connectedness_rank / totalMSOAs) * 100);
+                        const narrative = percentile >= 80 ? 'significant social fragmentation and isolation' :
+                                        percentile >= 60 ? 'weak community ties and social isolation challenges' :
+                                        percentile >= 40 ? 'moderate levels of social connectedness' :
+                                        percentile >= 20 ? 'solid community ties and social networks' :
+                                        'exceptional social cohesion with strong community bonds';
+                        return `Positioned in the <strong>${percentile}th percentile</strong> nationally for social cohesion, reflecting ${narrative}.`;
+                    })() : 'No data available for connectedness.'
+                },
+                {
+                    label: 'Community Engagement',
+                    value: area.active_engaged_rank ? Math.round(100 - (area.active_engaged_rank / totalMSOAs) * 100) : null,
+                    class: area.active_engaged_rank ? getNeedClass(100 - (area.active_engaged_rank / totalMSOAs) * 100) : 'low',
+                    description: area.active_engaged_rank ? (() => {
+                        const percentile = Math.round(100 - (area.active_engaged_rank / totalMSOAs) * 100);
+                        const narrative = percentile >= 80 ? 'significant disengagement from community life' :
+                                        percentile >= 60 ? 'low civic engagement and participation' :
+                                        percentile >= 40 ? 'moderate participation in community activities' :
+                                        percentile >= 20 ? 'active community engagement in local affairs' :
+                                        'vibrant civic participation with highly engaged residents';
+                        return `Positioned in the <strong>${percentile}th percentile</strong> nationally for civic participation, reflecting ${narrative}.`;
+                    })() : 'No data available for community engagement.'
+                }
+            ];
+
+            container.innerHTML = cards.map(card => `
+                <div class="insight-card">
+                    <div class="insight-label">${card.label}</div>
+                    <div class="insight-value ${card.class}">${card.value !== null ? card.value + '%' : 'N/A'}</div>
+                    <div class="insight-description">${card.description}</div>
+                </div>
+            `).join('');
+        }
+
+
+
+        // Generate map narrative
+        function generateMapNarrative(area) {
+            const lsoas = LSOA_MAP_DATA[area.msoa_code] || [];
+            const total = lsoas.length;
+
+            if (total === 0) {
+                return `${area.neighbourhood_name} LSOA data is being compiled.`;
+            }
+
+            const critical = lsoas.filter(l => l.m === 'Mission Critical').length;
+            const priority = lsoas.filter(l => l.m === 'Mission Priority').length;
+            const support = lsoas.filter(l => l.m === 'Mission Support').length;
+
+            let narrative = `<strong>${area.neighbourhood_name}</strong> contains <strong>${total} Lower-layer Super Output Areas (LSOAs)</strong>.`;
+
+            const parts = [];
+            if (critical > 0) parts.push(`<strong>${critical}</strong> ${critical === 1 ? 'is' : 'are'} Mission Critical`);
+            if (priority > 0) parts.push(`<strong>${priority}</strong> ${priority === 1 ? 'is' : 'are'} Mission Priority`);
+
+            if (parts.length > 0) {
+                narrative += ' Of them, ' + parts.join(', ');
+                if (support > 0) {
+                    narrative += `, and <strong>${support}</strong> ${support === 1 ? 'is' : 'are'} Mission Support`;
+                }
+                narrative += '.';
+            } else if (support > 0) {
+                narrative += ` All <strong>${support}</strong> are Mission Support.`;
+            }
+
+            return narrative;
+        }
+
+        // Render map with LSOA boundaries or markers
+        async function renderMap(area) {
+            const mapEl = document.getElementById('map');
+
+            if (map) {
+                map.remove();
+            }
+
+            // Update narrative
+            document.getElementById('map-narrative').innerHTML = generateMapNarrative(area);
+
+            // Initialize Leaflet map
+            map = L.map('map').setView([52.5, -1.5], 10);
+
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+                maxZoom: 19
+            }).addTo(map);
+
+            // Get LSOAs for this MSOA
+            const lsoas = LSOA_MAP_DATA[area.msoa_code] || [];
+
+            if (lsoas.length === 0) {
+                L.marker([52.5, -1.5]).addTo(map)
+                    .bindPopup(`<div style="font-family: Inter, sans-serif;"><strong>${area.neighbourhood_name}</strong><br><span style="color: #64748B;">LSOA geographic data not yet embedded for this area.</span></div>`)
+                    .openPopup();
+                return;
+            }
+
+            // Try to load GeoJSON boundaries
+            try {
+                const response = await fetch('Lower_layer_Super_Output_Areas_December_2021_Boundaries_EW_BSC_V4_-4299016806856585929.geojson');
+                const geojson = await response.json();
+
+                // Filter to only LSOAs in this MSOA
+                const lsoaCodes = new Set(lsoas.map(l => l.c));
+                const lsoaClassifications = {};
+                lsoas.forEach(l => lsoaClassifications[l.c] = l.m);
+
+                const filteredFeatures = geojson.features.filter(f => lsoaCodes.has(f.properties.LSOA21CD));
+
+                // Add boundaries
+                const lsoaLayer = L.geoJSON(filteredFeatures, {
+                    style: function(feature) {
+                        const classification = lsoaClassifications[feature.properties.LSOA21CD];
+                        let fillColor = '#94A3B8';
+                        if (classification === 'Mission Critical') fillColor = '#DC3545';
+                        else if (classification === 'Mission Priority') fillColor = '#F97316';
+                        else if (classification === 'Mission Support') fillColor = '#F59E0B';
+
+                        return {
+                            fillColor: fillColor,
+                            weight: 2,
+                            opacity: 1,
+                            color: 'white',
+                            fillOpacity: 0.6
+                        };
+                    },
+                    onEachFeature: function(feature, layer) {
+                        const lsoaCode = feature.properties.LSOA21CD;
+                        const lsoaName = feature.properties.LSOA21NM;
+                        const classification = lsoaClassifications[lsoaCode] || '';
+
+                        layer.bindPopup(`
+                            <div style="font-family: Inter, sans-serif;">
+                                <strong>${lsoaName}</strong><br>
+                                <span style="font-size: 0.85rem; color: #64748B;">${lsoaCode}</span><br>
+                                <span style="font-weight: 600; margin-top: 4px; display: inline-block;">${classification || 'No classification'}</span>
+                            </div>
+                        `);
+                    }
+                }).addTo(map);
+
+                map.fitBounds(lsoaLayer.getBounds(), { padding: [20, 20] });
+
+            } catch (error) {
+                // Fallback to circle markers if GeoJSON fails to load
+                console.log('GeoJSON not available, using marker fallback');
+                const bounds = [];
+                lsoas.forEach(lsoa => {
+                    let fillColor = '#94A3B8';
+                    if (lsoa.m === 'Mission Critical') fillColor = '#DC3545';
+                    else if (lsoa.m === 'Mission Priority') fillColor = '#F97316';
+                    else if (lsoa.m === 'Mission Support') fillColor = '#F59E0B';
+
+                    const marker = L.circleMarker([lsoa.lat, lsoa.lng], {
+                        radius: 8,
+                        fillColor: fillColor,
+                        color: 'white',
+                        weight: 2,
+                        opacity: 1,
+                        fillOpacity: 0.8
+                    }).addTo(map);
+
+                    marker.bindPopup(`
+                        <div style="font-family: Inter, sans-serif;">
+                            <strong>${lsoa.n}</strong><br>
+                            <span style="font-size: 0.85rem; color: #64748B;">${lsoa.c}</span><br>
+                            <span style="font-weight: 600; margin-top: 4px; display: inline-block; color: ${fillColor};">${lsoa.m || 'No classification'}</span>
+                        </div>
+                    `);
+
+                    bounds.push([lsoa.lat, lsoa.lng]);
+                });
+
+                if (bounds.length > 0) {
+                    map.fitBounds(bounds, { padding: [30, 30] });
+                }
+            }
+
+            // Add legend
+            const legend = L.control({ position: 'bottomright' });
+            legend.onAdd = function() {
+                const div = L.DomUtil.create('div');
+                div.innerHTML = `
+                    <div style="background: white; padding: 12px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); font-family: Inter, sans-serif; font-size: 0.85rem;">
+                        <div style="font-weight: 700; margin-bottom: 8px; color: #1E293B;">Mission Status</div>
+                        <div style="margin-bottom: 4px;"><span style="display: inline-block; width: 16px; height: 16px; background: #DC3545; margin-right: 6px; border-radius: 2px;"></span>Critical</div>
+                        <div style="margin-bottom: 4px;"><span style="display: inline-block; width: 16px; height: 16px; background: #F97316; margin-right: 6px; border-radius: 2px;"></span>Priority</div>
+                        <div style="margin-bottom: 4px;"><span style="display: inline-block; width: 16px; height: 16px; background: #F59E0B; margin-right: 6px; border-radius: 2px;"></span>Support</div>
+                        <div><span style="display: inline-block; width: 16px; height: 16px; background: #94A3B8; margin-right: 6px; border-radius: 2px;"></span>Other</div>
+                    </div>
+                `;
+                return div;
+            };
+            legend.addTo(map);
+        }
+
+        // Render missions
+        function renderMissions(area) {
+            const container = document.getElementById('missions-grid');
+
+            const missions = [
+                {
+                    name: 'Growth',
+                    title: 'Mission 1: Kickstart Economic Growth',
+                    summary: 'Building pathways to economic opportunity through skills, employment, and entrepreneurship',
+                    percentile: area.hlnm_growth_percentile,
+                    data: [
+                        { label: 'Residents with No Qualifications', value: `${area.no_qualifications_pct?.toFixed(1)}%`, context: `Places the area in the ${Math.round(area.no_qualifications_pct_percentile)}th percentile nationally for educational attainment challenges` },
+                        { label: 'Degree-level Qualifications', value: `${area.level4_plus_pct?.toFixed(1)}%`, context: `Indicates the proportion of working-age residents with university-level credentials` },
+                        { label: 'Unemployment Indicator', value: `${Math.round(area.unemployed_count_percentile)}th percentile`, context: `Reflects involuntary joblessness as a barrier to economic security` },
+                        { label: 'Economic Inactivity', value: `${Math.round(area.inactive_count_percentile)}th percentile`, context: `Captures those not in work and not seeking employment, often due to structural barriers` }
+                    ]
+                },
+                {
+                    name: 'Energy',
+                    title: 'Mission 2: Clean Energy Superpower',
+                    summary: 'Advancing energy efficiency, affordability, and sustainability for all households',
+                    percentile: area.hlnm_energy_percentile,
+                    data: [
+                        { label: 'Energy Need Score', value: area.hlnm_energy?.toFixed(1), context: `Composite measure of fuel poverty risk, housing energy efficiency, and access to sustainable energy` }
+                    ]
+                },
+                {
+                    name: 'Crime',
+                    title: 'Mission 3: Take Back Our Streets',
+                    summary: 'Building safer, more cohesive communities through crime prevention and social investment',
+                    percentile: area.hlnm_crime_percentile,
+                    data: [
+                        { label: 'Crime Rank', value: area.hlnm_crime?.toLocaleString(), context: `National ranking for recorded crime and anti-social behavior affecting community safety` },
+                        { label: 'IMD Crime Score', value: area['Crime Score']?.toFixed(2), context: `Official government measure of violence, burglary, theft, and criminal damage` }
+                    ]
+                },
+                {
+                    name: 'Opportunity',
+                    title: 'Mission 4: Break Down Barriers to Opportunity',
+                    summary: 'Dismantling structural barriers to education, skills, and social mobility',
+                    percentile: area.hlnm_opportunity_percentile,
+                    data: [
+                        { label: 'Barriers to Opportunity Score', value: area.hlnm_opportunity?.toFixed(1), context: `Composite measure of educational gaps, skills deficits, and access to life-enhancing opportunities` },
+                        { label: 'Housing & Services Barriers', value: area['Barriers to Housing and Services Score']?.toFixed(1), context: `IMD measure of physical and financial barriers to housing and essential services` }
+                    ]
+                },
+                {
+                    name: 'Health',
+                    title: 'Mission 5: Build an NHS Fit for the Future',
+                    summary: 'Improving health outcomes through prevention, care access, and social determinants',
+                    percentile: area.hlnm_health_percentile,
+                    data: [
+                        { label: 'Health Need Score', value: area.hlnm_health?.toFixed(1), context: `Composite indicator of premature mortality, disability, and health deprivation` },
+                        { label: 'Residents Reporting Poor Health', value: `${area.bad_health_pct?.toFixed(1)}%`, context: `Self-reported health status from Census 2021, reflecting lived experience of ill-health` },
+                        { label: 'Health Deprivation Score (IMD)', value: area['Health Deprivation and Disability Score']?.toFixed(2), context: `Government measure of premature death, disability, and disease burden` }
+                    ]
+                }
+            ];
+
+            container.innerHTML = missions.map(mission => `
+                <div class="mission-card" id="mission-${mission.name.toLowerCase()}">
+                    <div class="mission-header">
+                        <div class="mission-header-content">
+                            <h3>${mission.title}</h3>
+                            <p class="mission-summary">${mission.summary}</p>
+                        </div>
+                        <div class="mission-indicator">
+                            <div class="mission-score" style="color: ${getNeedColor(mission.percentile)};">
+                                ${Math.round(mission.percentile)}%
+                            </div>
+                            <div class="mission-expand">▼</div>
+                        </div>
+                    </div>
+                    <div class="mission-content">
+                        <div class="mission-body">
+                            <div class="mission-narrative">
+                                ${generateMissionNarrative(mission.name, area, mission.percentile)}
+                            </div>
+                            <div class="data-showcase">
+                                ${mission.data.map(d => `
+                                    <div class="data-point">
+                                        <div class="data-label">${d.label}</div>
+                                        <div class="data-value">${d.value || 'N/A'}</div>
+                                        <div class="data-context">${d.context}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Add expand handlers
+            document.querySelectorAll('.mission-header').forEach(header => {
+                header.addEventListener('click', function() {
+                    this.parentElement.classList.toggle('expanded');
+                });
+            });
+        }
+
+        // Render IMD
+        function renderIMD(area) {
+            const container = document.getElementById('imd-grid');
+
+            const imdDomains = [
+                {
+                    key: 'Index of Multiple Deprivation (IMD) Score',
+                    label: 'Overall Deprivation',
+                    description: 'Composite measure across income, employment, education, health, crime, housing, and environment',
+                    narratives: {
+                        top10: 'among the most deprived areas in England, facing severe and overlapping challenges',
+                        top20: 'experiencing significant deprivation across multiple dimensions',
+                        top30: 'facing considerable challenges requiring targeted intervention',
+                        top50: 'experiencing moderate deprivation in some areas',
+                        other: 'relatively less deprived compared to national average'
+                    }
+                },
+                {
+                    key: 'Income Score (rate)',
+                    label: 'Income Deprivation',
+                    description: 'Financial hardship and material disadvantage across the community',
+                    narratives: {
+                        top10: 'severe income poverty affecting a substantial proportion of residents',
+                        top20: 'significant financial hardship limiting household resources',
+                        top30: 'notable income constraints affecting living standards',
+                        top50: 'moderate income challenges present',
+                        other: 'relatively better income levels than national average'
+                    }
+                },
+                {
+                    key: 'Employment Score (rate)',
+                    label: 'Employment Deprivation',
+                    description: 'Labour market exclusion due to unemployment, sickness, or disability',
+                    narratives: {
+                        top10: 'severe employment barriers with many residents excluded from work',
+                        top20: 'significant unemployment and worklessness challenges',
+                        top30: 'notable employment access issues requiring support',
+                        top50: 'some employment barriers present',
+                        other: 'relatively stronger employment participation'
+                    }
+                },
+                {
+                    key: 'Education, Skills and Training Score',
+                    label: 'Education Deprivation',
+                    description: 'Educational attainment and skills gaps limiting life chances',
+                    narratives: {
+                        top10: 'severe educational disadvantage affecting children and adults',
+                        top20: 'significant skills gaps and low qualifications',
+                        top30: 'notable educational challenges requiring intervention',
+                        top50: 'some skills and attainment concerns',
+                        other: 'relatively stronger educational outcomes'
+                    }
+                },
+                {
+                    key: 'Health Deprivation and Disability Score',
+                    label: 'Health Deprivation',
+                    description: 'Poor physical and mental health reducing quality of life',
+                    narratives: {
+                        top10: 'severe health inequalities and high disability rates',
+                        top20: 'significant health challenges affecting wellbeing',
+                        top30: 'notable health deprivation requiring support',
+                        top50: 'some health disadvantage present',
+                        other: 'relatively better health outcomes'
+                    }
+                },
+                {
+                    key: 'Crime Score',
+                    label: 'Crime',
+                    description: 'Violence, theft, and criminal damage affecting safety and cohesion',
+                    narratives: {
+                        top10: 'very high crime rates undermining community safety',
+                        top20: 'significant crime concerns affecting residents',
+                        top30: 'notable crime levels requiring attention',
+                        top50: 'moderate crime challenges',
+                        other: 'relatively lower crime levels'
+                    }
+                },
+                {
+                    key: 'Barriers to Housing and Services Score',
+                    label: 'Housing & Services',
+                    description: 'Access challenges to housing and essential local services',
+                    narratives: {
+                        top10: 'severe barriers to affordable housing and key services',
+                        top20: 'significant access challenges to housing and services',
+                        top30: 'notable housing affordability or service access issues',
+                        top50: 'some housing and service barriers present',
+                        other: 'relatively better access to housing and services'
+                    }
+                },
+                {
+                    key: 'Living Environment Score',
+                    label: 'Living Environment',
+                    description: 'Housing quality and outdoor environment conditions',
+                    narratives: {
+                        top10: 'very poor housing and environmental conditions',
+                        top20: 'significant environmental quality concerns',
+                        top30: 'notable housing or environment issues',
+                        top50: 'some environmental challenges',
+                        other: 'relatively better living conditions'
+                    }
+                }
+            ];
+
+            // Convert score to percentile by ranking against all areas
+            // Higher score = more deprived = LOWER percentile (closer to 1st)
+            function getPercentileInfo(scoreKey, currentScore) {
+                if (currentScore === null || currentScore === undefined || currentScore === 'N/A') {
+                    return { percentile: null, narrativeKey: null, cssClass: 'low' };
+                }
+
+                // Get all scores for this domain from all areas
+                const allScores = allAreas
+                    .map(a => a[scoreKey])
+                    .filter(s => s !== null && s !== undefined && s !== 'N/A')
+                    .sort((a, b) => b - a); // Sort descending (highest score first = most deprived)
+
+                if (allScores.length === 0) {
+                    return { percentile: null, narrativeKey: null, cssClass: 'low' };
+                }
+
+                // Find where current score ranks
+                const rank = allScores.findIndex(s => s <= currentScore) + 1;
+
+                // Convert rank to percentile (lower percentile = more deprived)
+                const percentile = Math.round((rank / allScores.length) * 100);
+
+                let narrativeKey, cssClass;
+                if (percentile <= 10) {
+                    narrativeKey = 'top10';
+                    cssClass = 'critical';
+                } else if (percentile <= 20) {
+                    narrativeKey = 'top20';
+                    cssClass = 'critical';
+                } else if (percentile <= 30) {
+                    narrativeKey = 'top30';
+                    cssClass = 'high';
+                } else if (percentile <= 50) {
+                    narrativeKey = 'top50';
+                    cssClass = 'moderate';
+                } else {
+                    narrativeKey = 'other';
+                    cssClass = 'low';
+                }
+
+                return { percentile, narrativeKey, cssClass };
+            }
+
+            container.innerHTML = imdDomains.map(domain => {
+                const score = area[domain.key];
+                const info = getPercentileInfo(domain.key, score);
+
+                if (!info.percentile) {
+                    return `
+                        <div class="imd-card">
+                            <div class="imd-score low">N/A</div>
+                            <div class="imd-label">${domain.label}</div>
+                            <div class="imd-description">${domain.description}</div>
+                        </div>
+                    `;
+                }
+
+                const narrative = domain.narratives[info.narrativeKey];
+
+                return `
+                    <div class="imd-card">
+                        <div class="imd-score ${info.cssClass}">
+                            <span style="font-size: 1.5rem; font-weight: 700;">${info.percentile}th</span>
+                            <span style="font-size: 0.75rem; display: block; margin-top: -2px;">percentile</span>
+                        </div>
+                        <div class="imd-label">${domain.label}</div>
+                        <div class="imd-description" style="margin-top: 8px; font-size: 0.875rem; line-height: 1.4;">
+                            <strong style="color: #1E293B;">Positioned in the ${info.percentile}th percentile nationally,</strong> reflecting ${narrative}.
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            allAreas = DATA.areas || [];
+
+            const searchInput = document.getElementById('area-search');
+            const searchResults = document.getElementById('search-results');
+
+            searchInput.addEventListener('input', e => handleSearch(e.target.value));
+
+            document.addEventListener('click', e => {
+                if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                    searchResults.classList.remove('active');
+                }
+            });
+
+            searchInput.focus();
+        });
+    </script>
+</body>
+</html>
