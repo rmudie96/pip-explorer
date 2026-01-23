@@ -1729,18 +1729,23 @@
 
             if (!econData || !hlnmData) return;
 
-            // Get all LSOAs in this neighbourhood for comparison
-            const areaLSOAs = LSOA_MAP_DATA[currentArea.msoa_code] || [];
-            const areaEconData = areaLSOAs
-                .map(l => LSOA_ECONOMIC_DATA[l.c])
-                .filter(d => d !== undefined);
+            // National benchmarks for England (typical averages)
+            const nationalBenchmarks = {
+                jsa: 1.2,                    // JSA claimant rate
+                uc_search: 2.5,              // UC searching for work rate
+                gva: 35000,                  // GVA per head (£)
+                gva_change: 25,              // GVA growth 2012-2022 (%)
+                jobs_density: 0.8,           // Jobs per resident
+                income: 31400,               // Median household income (£)
+                no_quals: 7.0                // No qualifications rate (%)
+            };
 
             // Calculate drivers for Economic Growth score
             const drivers = [
                 {
                     label: 'Jobseekers Allowance Rate',
                     value: econData.jsa || 0,
-                    avg: areaEconData.reduce((sum, d) => sum + (d.jsa || 0), 0) / areaEconData.length,
+                    benchmark: nationalBenchmarks.jsa,
                     format: v => v.toFixed(1) + '%',
                     inverse: true, // Higher is worse
                     icon: '📉'
@@ -1748,7 +1753,7 @@
                 {
                     label: 'Universal Credit (searching for work)',
                     value: econData.uc_search || 0,
-                    avg: areaEconData.reduce((sum, d) => sum + (d.uc_search || 0), 0) / areaEconData.length,
+                    benchmark: nationalBenchmarks.uc_search,
                     format: v => v.toFixed(1) + '%',
                     inverse: true,
                     icon: '🔍'
@@ -1756,7 +1761,7 @@
                 {
                     label: 'GVA per Head (2022)',
                     value: econData.gva || 0,
-                    avg: areaEconData.reduce((sum, d) => sum + (d.gva || 0), 0) / areaEconData.length,
+                    benchmark: nationalBenchmarks.gva,
                     format: v => '£' + v.toLocaleString(),
                     inverse: false, // Higher is better
                     icon: '💷'
@@ -1764,7 +1769,7 @@
                 {
                     label: 'GVA Change (2012-2022)',
                     value: econData.gva_change || 0,
-                    avg: areaEconData.reduce((sum, d) => sum + (d.gva_change || 0), 0) / areaEconData.length,
+                    benchmark: nationalBenchmarks.gva_change,
                     format: v => (v > 0 ? '+' : '') + v.toFixed(1) + '%',
                     inverse: false,
                     icon: '📊'
@@ -1772,7 +1777,7 @@
                 {
                     label: 'Jobs Density',
                     value: econData.jobs_density || 0,
-                    avg: areaEconData.reduce((sum, d) => sum + (d.jobs_density || 0), 0) / areaEconData.length,
+                    benchmark: nationalBenchmarks.jobs_density,
                     format: v => v.toFixed(2),
                     inverse: false,
                     icon: '💼'
@@ -1780,7 +1785,7 @@
                 {
                     label: 'Median Household Income',
                     value: econData.income || 0,
-                    avg: areaEconData.reduce((sum, d) => sum + (d.income || 0), 0) / areaEconData.length,
+                    benchmark: nationalBenchmarks.income,
                     format: v => '£' + v.toLocaleString(),
                     inverse: false,
                     icon: '💰'
@@ -1788,23 +1793,28 @@
                 {
                     label: 'No Qualifications Rate',
                     value: econData.no_quals || 0,
-                    avg: areaEconData.reduce((sum, d) => sum + (d.no_quals || 0), 0) / areaEconData.length,
+                    benchmark: nationalBenchmarks.no_quals,
                     format: v => v.toFixed(1) + '%',
                     inverse: true,
                     icon: '🎓'
                 }
             ];
 
-            // Sort by deviation from average to find top drivers
+            // Sort by deviation from national benchmark to find top drivers
             drivers.forEach(d => {
-                d.deviation = d.inverse ?
-                    (d.value - d.avg) : // For inverse, higher value = worse = positive deviation
-                    (d.avg - d.value);  // For normal, lower value = worse = positive deviation
-                d.deviationPct = Math.abs(d.deviation / (d.avg || 1)) * 100;
+                if (d.inverse) {
+                    // For inverse metrics: higher than benchmark = worse
+                    d.deviation = d.value - d.benchmark;
+                    d.deviationPct = ((d.value - d.benchmark) / d.benchmark) * 100;
+                } else {
+                    // For normal metrics: lower than benchmark = worse
+                    d.deviation = d.benchmark - d.value;
+                    d.deviationPct = ((d.benchmark - d.value) / d.benchmark) * 100;
+                }
             });
 
             const topDrivers = drivers
-                .filter(d => d.value !== 0 && d.avg !== 0)
+                .filter(d => d.value !== 0)
                 .sort((a, b) => Math.abs(b.deviation) - Math.abs(a.deviation))
                 .slice(0, 3);
 
@@ -1815,21 +1825,27 @@
 
             const driversHTML = topDrivers.map(d => {
                 const isWorse = d.deviation > 0;
-                const comparison = isWorse ?
-                    `${Math.abs(d.deviationPct).toFixed(0)}% worse than neighbourhood average` :
-                    `${Math.abs(d.deviationPct).toFixed(0)}% better than neighbourhood average`;
+                let comparisonText;
+
+                if (Math.abs(d.deviationPct) < 5) {
+                    comparisonText = 'Close to national average';
+                } else if (isWorse) {
+                    comparisonText = `${Math.abs(d.deviationPct).toFixed(0)}% worse than national average`;
+                } else {
+                    comparisonText = `${Math.abs(d.deviationPct).toFixed(0)}% better than national average`;
+                }
 
                 return `
                     <div class="driver-card">
                         <div class="driver-icon">${d.icon}</div>
                         <div style="flex: 1;">
                             <div class="driver-label">${d.label}</div>
-                            <div class="driver-value" style="color: ${isWorse ? '#DC3545' : '#10B981'};">
+                            <div class="driver-value" style="color: ${isWorse ? '#DC3545' : Math.abs(d.deviationPct) < 5 ? '#64748B' : '#10B981'};">
                                 ${d.format(d.value)}
                             </div>
                             <div style="font-size: 0.8rem; color: #64748B; margin-top: 4px;">
-                                ${comparison}<br>
-                                <span style="font-size: 0.75rem;">Neighbourhood avg: ${d.format(d.avg)}</span>
+                                ${comparisonText}<br>
+                                <span style="font-size: 0.75rem;">England avg: ${d.format(d.benchmark)}</span>
                             </div>
                         </div>
                     </div>
