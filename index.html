@@ -694,7 +694,7 @@
     <div class="hero">
         <div class="hero-content">
             <div style="display: flex; align-items: center; gap: 2rem; margin-bottom: 2rem; flex-wrap: wrap;">
-                <img src="ICON-Logo-Final_optimised.png" alt="ICON" style="height: 60px; filter: brightness(0) invert(1);">
+                <img src="./ICON-Logo-Final_optimised.png" alt="ICON" style="height: 60px; filter: brightness(0) invert(1);">
                 <div style="height: 50px; width: 2px; background: rgba(255,255,255,0.3);"></div>
                 <h1 style="margin: 0;">Pride in Place Data Explorer</h1>
             </div>
@@ -837,9 +837,16 @@
 
             const narrative = `<strong>${area.neighbourhood_name}</strong> in <strong>${area.local_authority}</strong> presents a complex socioeconomic profile. The neighbourhood demonstrates <strong>${growthLevel} economic growth needs</strong>, ranking in the <strong>${Math.round(area.hlnm_growth_percentile)}th percentile</strong> nationally. Health challenges are <strong>${healthLevel}</strong>, with the area positioned in the <strong>${Math.round(area.hlnm_health_percentile)}th percentile</strong> for health-related need. `;
 
-            const imdContext = area['Index of Multiple Deprivation (IMD) Score'] >= 50 ?
-                `With an overall IMD score of <strong>${area['Index of Multiple Deprivation (IMD) Score'].toFixed(1)}</strong>, this neighbourhood experiences significant multidimensional deprivation.` :
-                `The overall IMD score of <strong>${area['Index of Multiple Deprivation (IMD) Score'].toFixed(1)}</strong> indicates moderate levels of deprivation across multiple domains.`;
+            // Calculate IMD percentile
+            const imdScore = area['Index of Multiple Deprivation (IMD) Score'];
+            const allIMDScores = allAreas
+                .map(a => a['Index of Multiple Deprivation (IMD) Score'])
+                .filter(s => s !== null && s !== undefined)
+                .sort((a, b) => a - b);
+            const numLower = allIMDScores.filter(s => s < imdScore).length;
+            const imdPercentile = Math.round((numLower / allIMDScores.length) * 100);
+
+            const imdContext = `For overall deprivation, this neighbourhood is positioned in the <strong>${imdPercentile}th percentile</strong> nationally.`;
 
             return narrative + imdContext;
         }
@@ -1089,7 +1096,7 @@
 
             // Try to load GeoJSON boundaries
             try {
-                const response = await fetch('Lower_layer_Super_Output_Areas_December_2021_Boundaries_EW_BSC_V4_-4299016806856585929.geojson');
+                const response = await fetch('./Lower_layer_Super_Output_Areas_December_2021_Boundaries_EW_BSC_V4_-4299016806856585929.geojson');
                 const geojson = await response.json();
 
                 // Filter to only LSOAs in this MSOA
@@ -1390,7 +1397,7 @@
             ];
 
             // Convert score to percentile by ranking against all areas
-            // Higher score = more deprived = LOWER percentile (closer to 1st)
+            // CRITICAL: Higher score = more deprived = HIGHER percentile (BAD)
             function getPercentileInfo(scoreKey, currentScore) {
                 if (currentScore === null || currentScore === undefined || currentScore === 'N/A') {
                     return { percentile: null, narrativeKey: null, cssClass: 'low' };
@@ -1400,29 +1407,31 @@
                 const allScores = allAreas
                     .map(a => a[scoreKey])
                     .filter(s => s !== null && s !== undefined && s !== 'N/A')
-                    .sort((a, b) => b - a); // Sort descending (highest score first = most deprived)
+                    .sort((a, b) => a - b); // Sort ASCENDING (lowest score first)
 
                 if (allScores.length === 0) {
                     return { percentile: null, narrativeKey: null, cssClass: 'low' };
                 }
 
-                // Find where current score ranks
-                const rank = allScores.findIndex(s => s <= currentScore) + 1;
+                // Find how many areas have LOWER scores than this one
+                const numLower = allScores.filter(s => s < currentScore).length;
 
-                // Convert rank to percentile (lower percentile = more deprived)
-                const percentile = Math.round((rank / allScores.length) * 100);
+                // Convert to percentile
+                // If all areas have lower scores, percentile = 100 (worst)
+                // If no areas have lower scores, percentile = 0 (best)
+                const percentile = Math.round((numLower / allScores.length) * 100);
 
                 let narrativeKey, cssClass;
-                if (percentile <= 10) {
+                if (percentile >= 90) {
                     narrativeKey = 'top10';
                     cssClass = 'critical';
-                } else if (percentile <= 20) {
+                } else if (percentile >= 80) {
                     narrativeKey = 'top20';
                     cssClass = 'critical';
-                } else if (percentile <= 30) {
+                } else if (percentile >= 70) {
                     narrativeKey = 'top30';
                     cssClass = 'high';
-                } else if (percentile <= 50) {
+                } else if (percentile >= 50) {
                     narrativeKey = 'top50';
                     cssClass = 'moderate';
                 } else {
