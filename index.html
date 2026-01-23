@@ -687,6 +687,187 @@
             padding: 3rem;
             color: var(--purple-blue);
         }
+
+        /* Deep Dive Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            max-width: 700px;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 2.5rem;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: var(--light-grey);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.5rem;
+            line-height: 1;
+            color: var(--primary-dark);
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: var(--primary-teal);
+            color: white;
+            transform: rotate(90deg);
+        }
+
+        .modal-header {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--light-grey);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-subtitle {
+            font-size: 0.9rem;
+            color: var(--mid-grey);
+        }
+
+        .driver-card {
+            background: linear-gradient(135deg, #F8FAFC 0%, white 100%);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--primary-teal);
+        }
+
+        .driver-label {
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+            font-size: 1.05rem;
+        }
+
+        .driver-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-teal);
+            margin-bottom: 0.5rem;
+        }
+
+        .driver-comparison {
+            font-size: 0.9rem;
+            color: var(--mid-grey);
+            margin-bottom: 0.5rem;
+        }
+
+        .driver-explanation {
+            font-size: 0.95rem;
+            color: var(--primary-dark);
+            line-height: 1.6;
+            padding-top: 0.5rem;
+            border-top: 1px solid var(--light-grey);
+        }
+
+        .deep-dive-btn {
+            background: linear-gradient(135deg, var(--primary-teal) 0%, var(--purple-blue) 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            margin-top: 12px;
+            width: 100%;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .deep-dive-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        }
+
+        /* Story Insights Section */
+        .story-section {
+            background: linear-gradient(135deg, var(--warm-grey) 0%, white 100%);
+            padding: 2.5rem;
+            border-radius: 16px;
+            margin: 2rem 0;
+            border: 2px solid var(--light-grey);
+        }
+
+        .story-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 1.5rem;
+        }
+
+        .story-insight {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--primary-teal);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .story-insight-label {
+            font-weight: 700;
+            color: var(--purple-blue);
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .story-insight-text {
+            color: var(--primary-dark);
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        .story-insight-stat {
+            font-weight: 700;
+            color: var(--primary-teal);
+        }
     </style>
 </head>
 <body>
@@ -761,6 +942,12 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Story Section -->
+            <div class="story-section" id="storySection" style="display:none;">
+                <div class="story-title">📖 Story: Economic Variation Within This Neighbourhood</div>
+                <div id="storyInsights"></div>
+            </div>
         </div>
 
         <!-- Missions Section -->
@@ -779,6 +966,18 @@
                 <p class="section-narrative">The Indices of Multiple Deprivation (IMD) provide the official government measure of relative deprivation across England's 32,844 neighbourhoods. Each metric is presented as a percentile showing where this area ranks nationally. Lower percentiles (closer to 1st) indicate higher deprivation, while higher percentiles (closer to 100th) indicate lower deprivation relative to other areas.</p>
             </div>
             <div class="imd-grid" id="imd-grid"></div>
+        </div>
+    </div>
+
+    <!-- Deep Dive Modal -->
+    <div class="modal-overlay" id="deepDiveModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeDeepDive()">×</button>
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">Economic Growth Deep Dive</div>
+                <div class="modal-subtitle" id="modalSubtitle">Understanding the drivers behind this score</div>
+            </div>
+            <div id="modalDrivers"></div>
         </div>
     </div>
 
@@ -934,6 +1133,9 @@
 
             // IMD
             renderIMD(area);
+
+            // Generate story insights
+            generateStoryInsights(area);
 
             // Scroll
             setTimeout(() => {
@@ -1168,6 +1370,14 @@
                                 Ranked ${hlnmData.or.toLocaleString()} of 33,754 LSOAs nationally according to ICON's Hyper-Local Need Measure</div>`;
 
                             popupContent += `</div>`;
+
+                            // Add deep dive button if economic data exists
+                            if (typeof LSOA_ECONOMIC_DATA !== 'undefined' && LSOA_ECONOMIC_DATA[lsoaCode]) {
+                                popupContent += `
+                                    <button class="deep-dive-btn" onclick="openDeepDive('${lsoaCode}', '${lsoaName.replace(/'/g, "\\'")}')" style="width: 100%; margin-top: 12px;">
+                                        📊 Why this score? See what's driving Economic Growth
+                                    </button>`;
+                            }
                         }
 
                         popupContent += `</div>`;
@@ -1510,6 +1720,224 @@
                     </div>
                 `;
             }).join('');
+        }
+
+        // Deep Dive Modal Functions
+        function openDeepDive(lsoaCode, lsoaName) {
+            const econData = LSOA_ECONOMIC_DATA[lsoaCode];
+            const hlnmData = LSOA_HLNM_DATA[lsoaCode];
+
+            if (!econData || !hlnmData) return;
+
+            // Get all LSOAs in this neighbourhood for comparison
+            const areaLSOAs = LSOA_MAP.filter(l => l.msoa === currentArea.msoa_code);
+            const areaEconData = areaLSOAs
+                .map(l => LSOA_ECONOMIC_DATA[l.c])
+                .filter(d => d !== undefined);
+
+            // Calculate drivers for Economic Growth score
+            const drivers = [
+                {
+                    label: 'Jobseekers Allowance Rate',
+                    value: econData.jsa || 0,
+                    avg: areaEconData.reduce((sum, d) => sum + (d.jsa || 0), 0) / areaEconData.length,
+                    format: v => v.toFixed(1) + '%',
+                    inverse: true, // Higher is worse
+                    icon: '📉'
+                },
+                {
+                    label: 'Universal Credit (searching for work)',
+                    value: econData.uc_search || 0,
+                    avg: areaEconData.reduce((sum, d) => sum + (d.uc_search || 0), 0) / areaEconData.length,
+                    format: v => v.toFixed(1) + '%',
+                    inverse: true,
+                    icon: '🔍'
+                },
+                {
+                    label: 'GVA per Head (2022)',
+                    value: econData.gva || 0,
+                    avg: areaEconData.reduce((sum, d) => sum + (d.gva || 0), 0) / areaEconData.length,
+                    format: v => '£' + v.toLocaleString(),
+                    inverse: false, // Higher is better
+                    icon: '💷'
+                },
+                {
+                    label: 'GVA Change (2012-2022)',
+                    value: econData.gva_change || 0,
+                    avg: areaEconData.reduce((sum, d) => sum + (d.gva_change || 0), 0) / areaEconData.length,
+                    format: v => (v > 0 ? '+' : '') + v.toFixed(1) + '%',
+                    inverse: false,
+                    icon: '📊'
+                },
+                {
+                    label: 'Jobs Density',
+                    value: econData.jobs_density || 0,
+                    avg: areaEconData.reduce((sum, d) => sum + (d.jobs_density || 0), 0) / areaEconData.length,
+                    format: v => v.toFixed(2),
+                    inverse: false,
+                    icon: '💼'
+                },
+                {
+                    label: 'Median Household Income',
+                    value: econData.income || 0,
+                    avg: areaEconData.reduce((sum, d) => sum + (d.income || 0), 0) / areaEconData.length,
+                    format: v => '£' + v.toLocaleString(),
+                    inverse: false,
+                    icon: '💰'
+                },
+                {
+                    label: 'No Qualifications Rate',
+                    value: econData.no_quals || 0,
+                    avg: areaEconData.reduce((sum, d) => sum + (d.no_quals || 0), 0) / areaEconData.length,
+                    format: v => v.toFixed(1) + '%',
+                    inverse: true,
+                    icon: '🎓'
+                }
+            ];
+
+            // Sort by deviation from average to find top drivers
+            drivers.forEach(d => {
+                d.deviation = d.inverse ?
+                    (d.value - d.avg) : // For inverse, higher value = worse = positive deviation
+                    (d.avg - d.value);  // For normal, lower value = worse = positive deviation
+                d.deviationPct = Math.abs(d.deviation / (d.avg || 1)) * 100;
+            });
+
+            const topDrivers = drivers
+                .filter(d => d.value !== 0 && d.avg !== 0)
+                .sort((a, b) => Math.abs(b.deviation) - Math.abs(a.deviation))
+                .slice(0, 3);
+
+            // Populate modal
+            document.getElementById('modalTitle').textContent = lsoaName;
+            document.getElementById('modalSubtitle').textContent =
+                `Economic Growth Score: ${hlnmData.gp}th percentile`;
+
+            const driversHTML = topDrivers.map(d => {
+                const isWorse = d.deviation > 0;
+                const comparison = isWorse ?
+                    `${Math.abs(d.deviationPct).toFixed(0)}% worse than neighbourhood average` :
+                    `${Math.abs(d.deviationPct).toFixed(0)}% better than neighbourhood average`;
+
+                return `
+                    <div class="driver-card">
+                        <div class="driver-icon">${d.icon}</div>
+                        <div style="flex: 1;">
+                            <div class="driver-label">${d.label}</div>
+                            <div class="driver-value" style="color: ${isWorse ? '#DC3545' : '#10B981'};">
+                                ${d.format(d.value)}
+                            </div>
+                            <div style="font-size: 0.8rem; color: #64748B; margin-top: 4px;">
+                                ${comparison}<br>
+                                <span style="font-size: 0.75rem;">Neighbourhood avg: ${d.format(d.avg)}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('modalDrivers').innerHTML = driversHTML;
+            document.getElementById('deepDiveModal').style.display = 'flex';
+        }
+
+        function closeDeepDive() {
+            document.getElementById('deepDiveModal').style.display = 'none';
+        }
+
+        // Close modal on outside click
+        document.addEventListener('click', function(e) {
+            const modal = document.getElementById('deepDiveModal');
+            if (e.target === modal) {
+                closeDeepDive();
+            }
+        });
+
+        // Story Generator Function
+        function generateStoryInsights(area) {
+            const areaLSOAs = LSOA_MAP.filter(l => l.msoa === area.msoa_code);
+
+            if (areaLSOAs.length === 0 || typeof LSOA_ECONOMIC_DATA === 'undefined') {
+                return;
+            }
+
+            const lsoaDataArray = areaLSOAs
+                .map(l => ({
+                    code: l.c,
+                    name: l.n,
+                    hlnm: LSOA_HLNM_DATA[l.c],
+                    econ: LSOA_ECONOMIC_DATA[l.c]
+                }))
+                .filter(d => d.hlnm && d.econ);
+
+            if (lsoaDataArray.length === 0) return;
+
+            const insights = [];
+
+            // 1. Most challenged LSOA
+            const mostChallenged = lsoaDataArray.reduce((prev, curr) =>
+                (curr.hlnm.gp > prev.hlnm.gp) ? curr : prev
+            );
+            insights.push(`
+                <div class="story-insight">
+                    <strong>${mostChallenged.name}</strong> faces the greatest economic growth challenges
+                    (${mostChallenged.hlnm.gp}th percentile), with ${mostChallenged.econ.uc_search?.toFixed(1)}% of residents
+                    on Universal Credit searching for work.
+                </div>
+            `);
+
+            // 2. GVA decline variation
+            const gvaDecliners = lsoaDataArray.filter(d => d.econ.gva_change < 0);
+            if (gvaDecliners.length > 0) {
+                const steepestDecline = gvaDecliners.reduce((prev, curr) =>
+                    (curr.econ.gva_change < prev.econ.gva_change) ? curr : prev
+                );
+                insights.push(`
+                    <div class="story-insight">
+                        Economic productivity has declined across the neighbourhood, with <strong>${steepestDecline.name}</strong>
+                        experiencing the steepest fall (${steepestDecline.econ.gva_change?.toFixed(1)}% between 2012-2022).
+                    </div>
+                `);
+            }
+
+            // 3. Digital divide
+            const broadbandSpeeds = lsoaDataArray.filter(d => d.econ.broadband > 0);
+            if (broadbandSpeeds.length > 1) {
+                const fastest = broadbandSpeeds.reduce((prev, curr) =>
+                    (curr.econ.broadband > prev.econ.broadband) ? curr : prev
+                );
+                const slowest = broadbandSpeeds.reduce((prev, curr) =>
+                    (curr.econ.broadband < prev.econ.broadband) ? curr : prev
+                );
+                const gap = fastest.econ.broadband - slowest.econ.broadband;
+                if (gap > 50) {
+                    insights.push(`
+                        <div class="story-insight">
+                            A digital divide exists: <strong>${fastest.name}</strong> has broadband speeds of
+                            ${fastest.econ.broadband?.toFixed(0)} Mbps, while <strong>${slowest.name}</strong>
+                            only reaches ${slowest.econ.broadband?.toFixed(0)} Mbps.
+                        </div>
+                    `);
+                }
+            }
+
+            // 4. Skills gap
+            const noQualsRange = lsoaDataArray.filter(d => d.econ.no_quals > 0);
+            if (noQualsRange.length > 1) {
+                const highest = noQualsRange.reduce((prev, curr) =>
+                    (curr.econ.no_quals > prev.econ.no_quals) ? curr : prev
+                );
+                insights.push(`
+                    <div class="story-insight">
+                        Skills challenges are concentrated in <strong>${highest.name}</strong>, where
+                        ${highest.econ.no_quals?.toFixed(1)}% of residents have no formal qualifications.
+                    </div>
+                `);
+            }
+
+            if (insights.length > 0) {
+                document.getElementById('storyInsights').innerHTML = insights.join('');
+                document.getElementById('storySection').style.display = 'block';
+            }
         }
 
         // Initialize

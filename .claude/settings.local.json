@@ -21,7 +21,12 @@
       "Bash(git init:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git config:*)"
+      "Bash(git config:*)",
+      "Bash(git remote add:*)",
+      "Bash(git branch:*)",
+      "Bash(git push:*)",
+      "Bash(powershell.exe -ExecutionPolicy Bypass -File extract_pip_lsoa_hlnm.ps1)",
+      "Bash(powershell.exe -ExecutionPolicy Bypass -File extract_lsoa_economic_underlying.ps1)"
     ]
   }
 }
