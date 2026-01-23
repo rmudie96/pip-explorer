@@ -1730,7 +1730,7 @@
             if (!econData || !hlnmData) return;
 
             // Get all LSOAs in this neighbourhood for comparison
-            const areaLSOAs = LSOA_MAP.filter(l => l.msoa === currentArea.msoa_code);
+            const areaLSOAs = LSOA_MAP_DATA[currentArea.msoa_code] || [];
             const areaEconData = areaLSOAs
                 .map(l => LSOA_ECONOMIC_DATA[l.c])
                 .filter(d => d !== undefined);
@@ -1854,7 +1854,7 @@
 
         // Story Generator Function
         function generateStoryInsights(area) {
-            const areaLSOAs = LSOA_MAP.filter(l => l.msoa === area.msoa_code);
+            const areaLSOAs = LSOA_MAP_DATA[area.msoa_code] || [];
 
             if (areaLSOAs.length === 0 || typeof LSOA_ECONOMIC_DATA === 'undefined') {
                 return;
