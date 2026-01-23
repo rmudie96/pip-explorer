@@ -740,7 +740,7 @@
         <!-- Map Section -->
         <div class="section">
             <div class="section-header">
-                <h2 class="section-title">Geographic Context</h2>
+                <h2 class="section-title">What does the challenge look like in different parts of this neighbourhood?</h2>
                 <p class="section-narrative" id="map-narrative"></p>
             </div>
             <div class="map-container" id="map"></div>
@@ -1148,7 +1148,7 @@
                             ];
 
                             popupContent += `<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #E2E8F0;">
-                                <div style="font-weight: 600; margin-bottom: 8px; font-size: 0.9rem;">Government Mission Challenges</div>`;
+                                <div style="font-weight: 600; margin-bottom: 8px; font-size: 0.9rem;">Neighbourhood Need</div>`;
 
                             missions.forEach(m => {
                                 const severity = m.p <= 10 ? {color: '#DC3545', label: 'Critical need'} :
@@ -1158,17 +1158,13 @@
 
                                 popupContent += `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 0.85rem;">
                                     <span>${m.icon} ${m.label}</span>
-                                    <span style="color: ${severity.color}; font-weight: 600;">${m.p}th %ile <span style="font-size: 0.75rem; color: #64748B;">(${severity.label})</span></span>
+                                    <span style="color: ${severity.color}; font-weight: 600;">${m.p}th percentile <span style="font-size: 0.75rem; color: #64748B;">(${severity.label})</span></span>
                                 </div>`;
                             });
 
                             // Add rank insight
-                            const rankText = hlnmData.or <= 500 ? 'among England\'s most challenged' :
-                                           hlnmData.or <= 3000 ? 'facing significant challenges' :
-                                           hlnmData.or <= 10000 ? 'with moderate needs' :
-                                           'relatively less deprived';
                             popupContent += `<div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #E2E8F0; font-size: 0.8rem; color: #64748B;">
-                                Ranked ${hlnmData.or.toLocaleString()} of 33,754 LSOAs nationally – ${rankText}</div>`;
+                                Ranked ${hlnmData.or.toLocaleString()} of 33,754 LSOAs nationally according to ICON's Hyper-Local Need Measure</div>`;
 
                             popupContent += `</div>`;
                         }
