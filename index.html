@@ -710,7 +710,8 @@
         .modal-content {
             background: white;
             border-radius: 20px;
-            max-width: 700px;
+            max-width: 900px;
+            width: 90%;
             max-height: 85vh;
             overflow-y: auto;
             padding: 2.5rem;
@@ -925,22 +926,13 @@
                 <p class="section-narrative" id="map-narrative"></p>
             </div>
             <div class="map-container" id="map"></div>
-            <div class="map-legend">
-                <div class="legend-title">LSOA Mission Classification</div>
-                <div class="legend-items">
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #DC3545;"></div>
-                        <span class="legend-label">Mission Critical</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #F97316;"></div>
-                        <span class="legend-label">Mission Priority</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #F59E0B;"></div>
-                        <span class="legend-label">Mission Support</span>
-                    </div>
-                </div>
+            <div style="background: var(--warm-grey); padding: 1.5rem; border-radius: 12px; margin-top: 1.5rem; font-size: 0.875rem; line-height: 1.6;">
+                <p style="margin: 0;">
+                    LSOAs are classified using ICON's Hyper-Local Need Measure across the five government missions.
+                    <strong style="color: #DC3545;">Mission Critical</strong> areas rank in the most deprived 10% nationally and require urgent targeted intervention.
+                    <strong style="color: #F97316;">Mission Priority</strong> areas fall in the 10-30% most deprived, facing significant challenges requiring sustained support.
+                    <strong style="color: #F59E0B;">Mission Support</strong> areas sit in the 30-50% most deprived bracket, needing preventative investment to avoid further decline.
+                </p>
             </div>
 
             <!-- Story Section -->
@@ -1451,10 +1443,10 @@
                     summary: 'Building pathways to economic opportunity through skills, employment, and entrepreneurship',
                     percentile: area.hlnm_growth_percentile,
                     data: [
-                        { label: 'Residents with No Qualifications', value: `${area.no_qualifications_pct?.toFixed(1)}%`, context: `Places the area in the ${Math.round(area.no_qualifications_pct_percentile)}th percentile nationally for educational attainment challenges` },
-                        { label: 'Degree-level Qualifications', value: `${area.level4_plus_pct?.toFixed(1)}%`, context: `Indicates the proportion of working-age residents with university-level credentials` },
-                        { label: 'Unemployment Indicator', value: `${Math.round(area.unemployed_count_percentile)}th percentile`, context: `Reflects involuntary joblessness as a barrier to economic security` },
-                        { label: 'Economic Inactivity', value: `${Math.round(area.inactive_count_percentile)}th percentile`, context: `Captures those not in work and not seeking employment, often due to structural barriers` }
+                        { label: 'No Qualifications', percentile: area.no_qualifications_pct_percentile, detail: `${area.no_qualifications_pct?.toFixed(1)}% of residents have no formal qualifications` },
+                        { label: 'Degree-level Qualifications', percentile: 100 - area.level4_plus_pct_percentile, detail: `${area.level4_plus_pct?.toFixed(1)}% hold university-level credentials` },
+                        { label: 'Unemployment', percentile: area.unemployed_count_percentile, detail: `Involuntary joblessness affecting economic security` },
+                        { label: 'Economic Inactivity', percentile: area.inactive_count_percentile, detail: `Not in work and not seeking employment` }
                     ]
                 },
                 {
@@ -1463,7 +1455,7 @@
                     summary: 'Advancing energy efficiency, affordability, and sustainability for all households',
                     percentile: area.hlnm_energy_percentile,
                     data: [
-                        { label: 'Energy Need Score', value: area.hlnm_energy?.toFixed(1), context: `Composite measure of fuel poverty risk, housing energy efficiency, and access to sustainable energy` }
+                        { label: 'Energy Need', percentile: area.hlnm_energy_percentile, detail: `Fuel poverty risk, housing efficiency, and sustainable energy access` }
                     ]
                 },
                 {
@@ -1472,8 +1464,7 @@
                     summary: 'Building safer, more cohesive communities through crime prevention and social investment',
                     percentile: area.hlnm_crime_percentile,
                     data: [
-                        { label: 'Crime Rank', value: area.hlnm_crime?.toLocaleString(), context: `National ranking for recorded crime and anti-social behavior affecting community safety` },
-                        { label: 'IMD Crime Score', value: area['Crime Score']?.toFixed(2), context: `Official government measure of violence, burglary, theft, and criminal damage` }
+                        { label: 'Crime & Safety', percentile: area.hlnm_crime_percentile, detail: `Violence, burglary, theft, and anti-social behavior` }
                     ]
                 },
                 {
@@ -1482,8 +1473,7 @@
                     summary: 'Dismantling structural barriers to education, skills, and social mobility',
                     percentile: area.hlnm_opportunity_percentile,
                     data: [
-                        { label: 'Barriers to Opportunity Score', value: area.hlnm_opportunity?.toFixed(1), context: `Composite measure of educational gaps, skills deficits, and access to life-enhancing opportunities` },
-                        { label: 'Housing & Services Barriers', value: area['Barriers to Housing and Services Score']?.toFixed(1), context: `IMD measure of physical and financial barriers to housing and essential services` }
+                        { label: 'Barriers to Opportunity', percentile: area.hlnm_opportunity_percentile, detail: `Educational gaps, skills deficits, and access barriers` }
                     ]
                 },
                 {
@@ -1492,9 +1482,8 @@
                     summary: 'Improving health outcomes through prevention, care access, and social determinants',
                     percentile: area.hlnm_health_percentile,
                     data: [
-                        { label: 'Health Need Score', value: area.hlnm_health?.toFixed(1), context: `Composite indicator of premature mortality, disability, and health deprivation` },
-                        { label: 'Residents Reporting Poor Health', value: `${area.bad_health_pct?.toFixed(1)}%`, context: `Self-reported health status from Census 2021, reflecting lived experience of ill-health` },
-                        { label: 'Health Deprivation Score (IMD)', value: area['Health Deprivation and Disability Score']?.toFixed(2), context: `Government measure of premature death, disability, and disease burden` }
+                        { label: 'Health Deprivation', percentile: area.hlnm_health_percentile, detail: `Premature mortality, disability, and disease burden` },
+                        { label: 'Poor Health (self-reported)', percentile: area.bad_health_pct_percentile, detail: `${area.bad_health_pct?.toFixed(1)}% report bad or very bad health` }
                     ]
                 }
             ];
@@ -1507,8 +1496,9 @@
                             <p class="mission-summary">${mission.summary}</p>
                         </div>
                         <div class="mission-indicator">
-                            <div class="mission-score" style="color: ${getNeedColor(mission.percentile)};">
-                                ${Math.round(mission.percentile)}%
+                            <div class="mission-score ${getNeedClass(mission.percentile)}" style="color: ${getNeedColor(mission.percentile)};">
+                                ${Math.round(mission.percentile)}th
+                                <span style="font-size: 0.7rem; display: block; margin-top: -4px; opacity: 0.8;">percentile</span>
                             </div>
                             <div class="mission-expand">▼</div>
                         </div>
@@ -1519,13 +1509,21 @@
                                 ${generateMissionNarrative(mission.name, area, mission.percentile)}
                             </div>
                             <div class="data-showcase">
-                                ${mission.data.map(d => `
-                                    <div class="data-point">
-                                        <div class="data-label">${d.label}</div>
-                                        <div class="data-value">${d.value || 'N/A'}</div>
-                                        <div class="data-context">${d.context}</div>
-                                    </div>
-                                `).join('')}
+                                ${mission.data.map(d => {
+                                    const needClass = getNeedClass(d.percentile);
+                                    const needColor = getNeedColor(d.percentile);
+                                    return `
+                                        <div class="data-point">
+                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                                <div class="data-label">${d.label}</div>
+                                                <div style="font-size: 1.25rem; font-weight: 700; color: ${needColor};">
+                                                    ${Math.round(d.percentile)}th
+                                                </div>
+                                            </div>
+                                            <div class="data-context">${d.detail}</div>
+                                        </div>
+                                    `;
+                                }).join('')}
                             </div>
                         </div>
                     </div>
@@ -1669,18 +1667,18 @@
                 const percentile = Math.round((numLower / allScores.length) * 100);
 
                 let narrativeKey, cssClass;
-                // LOW percentile = BAD (most deprived)
-                // HIGH percentile = GOOD (least deprived)
-                if (percentile <= 10) {
+                // HIGH percentile = BAD (most deprived) - higher score = worse
+                // LOW percentile = GOOD (least deprived) - lower score = better
+                if (percentile >= 90) {
                     narrativeKey = 'top10';
                     cssClass = 'critical';
-                } else if (percentile <= 20) {
+                } else if (percentile >= 80) {
                     narrativeKey = 'top20';
                     cssClass = 'critical';
-                } else if (percentile <= 30) {
+                } else if (percentile >= 70) {
                     narrativeKey = 'top30';
                     cssClass = 'high';
-                } else if (percentile <= 50) {
+                } else if (percentile >= 50) {
                     narrativeKey = 'top50';
                     cssClass = 'moderate';
                 } else {
@@ -1729,130 +1727,133 @@
 
             if (!econData || !hlnmData) return;
 
-            // National benchmarks for England (typical averages)
+            // National benchmarks for England
             const nationalBenchmarks = {
-                jsa: 1.2,                    // JSA claimant rate
-                uc_search: 2.5,              // UC searching for work rate
-                gva: 35000,                  // GVA per head (£)
-                gva_change: 25,              // GVA growth 2012-2022 (%)
-                jobs_density: 0.8,           // Jobs per resident
-                income: 31400,               // Median household income (£)
-                no_quals: 7.0                // No qualifications rate (%)
+                jsa: 1.2,
+                uc_search: 2.5,
+                uc_total: 4.0,
+                gva: 35000,
+                gva_change: 25,
+                jobs_density: 0.8,
+                jobs_access: 750000,
+                income: 31400,
+                no_quals: 7.0,
+                level3plus: 61.0,
+                higher_mgr: 11.0,
+                digital: 95.0,
+                broadband: 80.0,
+                highgrowth: 10.0
             };
 
-            // Calculate drivers for Economic Growth score
-            const drivers = [
+            // All indicators organized by category
+            const indicatorSections = [
                 {
-                    label: 'Jobseekers Allowance Rate',
-                    value: econData.jsa || 0,
-                    benchmark: nationalBenchmarks.jsa,
-                    format: v => v.toFixed(1) + '%',
-                    inverse: true, // Higher is worse
-                    icon: '📉'
+                    title: 'Employment & Benefits',
+                    indicators: [
+                        { label: 'JSA Claimant Rate', key: 'jsa', format: v => v.toFixed(1) + '%', inverse: true },
+                        { label: 'UC (Searching for Work)', key: 'uc_search', format: v => v.toFixed(1) + '%', inverse: true },
+                        { label: 'UC (Total)', key: 'uc_total', format: v => v.toFixed(1) + '%', inverse: true },
+                        { label: 'Jobs Density', key: 'jobs_density', format: v => v.toFixed(2), inverse: false },
+                        { label: 'Job Accessibility', key: 'jobs_access', format: v => v.toLocaleString() + ' jobs', inverse: false }
+                    ]
                 },
                 {
-                    label: 'Universal Credit (searching for work)',
-                    value: econData.uc_search || 0,
-                    benchmark: nationalBenchmarks.uc_search,
-                    format: v => v.toFixed(1) + '%',
-                    inverse: true,
-                    icon: '🔍'
+                    title: 'Economic Productivity',
+                    indicators: [
+                        { label: 'GVA per Head (2022)', key: 'gva', format: v => '£' + v.toLocaleString(), inverse: false },
+                        { label: 'GVA Change (2012-2022)', key: 'gva_change', format: v => (v > 0 ? '+' : '') + v.toFixed(1) + '%', inverse: false },
+                        { label: 'High Growth Businesses', key: 'highgrowth', format: v => v.toFixed(1) + '%', inverse: false }
+                    ]
                 },
                 {
-                    label: 'GVA per Head (2022)',
-                    value: econData.gva || 0,
-                    benchmark: nationalBenchmarks.gva,
-                    format: v => '£' + v.toLocaleString(),
-                    inverse: false, // Higher is better
-                    icon: '💷'
+                    title: 'Skills & Education',
+                    indicators: [
+                        { label: 'No Qualifications', key: 'no_quals', format: v => v.toFixed(1) + '%', inverse: true },
+                        { label: 'Level 3+ Qualifications', key: 'level3plus', format: v => v.toFixed(1) + '%', inverse: false },
+                        { label: 'Higher Managerial/Professional', key: 'higher_mgr', format: v => v.toFixed(1) + '%', inverse: false }
+                    ]
                 },
                 {
-                    label: 'GVA Change (2012-2022)',
-                    value: econData.gva_change || 0,
-                    benchmark: nationalBenchmarks.gva_change,
-                    format: v => (v > 0 ? '+' : '') + v.toFixed(1) + '%',
-                    inverse: false,
-                    icon: '📊'
+                    title: 'Income',
+                    indicators: [
+                        { label: 'Median Household Income', key: 'income', format: v => '£' + v.toLocaleString(), inverse: false }
+                    ]
                 },
                 {
-                    label: 'Jobs Density',
-                    value: econData.jobs_density || 0,
-                    benchmark: nationalBenchmarks.jobs_density,
-                    format: v => v.toFixed(2),
-                    inverse: false,
-                    icon: '💼'
-                },
-                {
-                    label: 'Median Household Income',
-                    value: econData.income || 0,
-                    benchmark: nationalBenchmarks.income,
-                    format: v => '£' + v.toLocaleString(),
-                    inverse: false,
-                    icon: '💰'
-                },
-                {
-                    label: 'No Qualifications Rate',
-                    value: econData.no_quals || 0,
-                    benchmark: nationalBenchmarks.no_quals,
-                    format: v => v.toFixed(1) + '%',
-                    inverse: true,
-                    icon: '🎓'
+                    title: 'Digital Connectivity',
+                    indicators: [
+                        { label: 'Digital Adoption', key: 'digital', format: v => v.toFixed(1) + '%', inverse: false },
+                        { label: 'Broadband Speed', key: 'broadband', format: v => v.toFixed(0) + ' Mbps', inverse: false }
+                    ]
                 }
             ];
 
-            // Sort by deviation from national benchmark to find top drivers
-            drivers.forEach(d => {
-                if (d.inverse) {
-                    // For inverse metrics: higher than benchmark = worse
-                    d.deviation = d.value - d.benchmark;
-                    d.deviationPct = ((d.value - d.benchmark) / d.benchmark) * 100;
-                } else {
-                    // For normal metrics: lower than benchmark = worse
-                    d.deviation = d.benchmark - d.value;
-                    d.deviationPct = ((d.benchmark - d.value) / d.benchmark) * 100;
-                }
-            });
+            // Calculate comparison for each indicator
+            function calculateComparison(value, benchmark, inverse) {
+                if (value === 0 || value === null || value === undefined) return null;
 
-            const topDrivers = drivers
-                .filter(d => d.value !== 0)
-                .sort((a, b) => Math.abs(b.deviation) - Math.abs(a.deviation))
-                .slice(0, 3);
+                const deviation = inverse ?
+                    (value - benchmark) :
+                    (benchmark - value);
+                const deviationPct = ((inverse ? value - benchmark : benchmark - value) / benchmark) * 100;
+                const isWorse = deviation > 0;
+
+                let comparisonText;
+                if (Math.abs(deviationPct) < 5) {
+                    comparisonText = 'Close to England average';
+                } else if (isWorse) {
+                    comparisonText = `${Math.abs(deviationPct).toFixed(0)}% worse`;
+                } else {
+                    comparisonText = `${Math.abs(deviationPct).toFixed(0)}% better`;
+                }
+
+                return {
+                    isWorse,
+                    comparisonText,
+                    color: isWorse ? '#DC3545' : Math.abs(deviationPct) < 5 ? '#64748B' : '#10B981'
+                };
+            }
+
+            // Build HTML for all sections
+            let sectionsHTML = '';
+            indicatorSections.forEach(section => {
+                const indicatorsHTML = section.indicators.map(ind => {
+                    const value = econData[ind.key];
+                    const benchmark = nationalBenchmarks[ind.key];
+                    const comparison = calculateComparison(value, benchmark, ind.inverse);
+
+                    if (!comparison) return '';
+
+                    return `
+                        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px; padding: 12px 0; border-bottom: 1px solid #E2E8F0;">
+                            <div style="font-size: 0.875rem; font-weight: 500;">${ind.label}</div>
+                            <div style="font-size: 0.875rem; font-weight: 700; color: ${comparison.color};">
+                                ${ind.format(value)}
+                            </div>
+                            <div style="font-size: 0.75rem; color: #64748B; text-align: right;">
+                                ${comparison.comparisonText}<br>
+                                <span style="font-size: 0.7rem;">England: ${ind.format(benchmark)}</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                sectionsHTML += `
+                    <div style="margin-bottom: 24px;">
+                        <h4 style="font-size: 0.95rem; font-weight: 700; color: #1E293B; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 2px solid #E2E8F0;">
+                            ${section.title}
+                        </h4>
+                        ${indicatorsHTML}
+                    </div>
+                `;
+            });
 
             // Populate modal
             document.getElementById('modalTitle').textContent = lsoaName;
             document.getElementById('modalSubtitle').textContent =
-                `Economic Growth Score: ${hlnmData.gp}th percentile`;
+                `Economic Growth: ${hlnmData.gp}th percentile nationally`;
 
-            const driversHTML = topDrivers.map(d => {
-                const isWorse = d.deviation > 0;
-                let comparisonText;
-
-                if (Math.abs(d.deviationPct) < 5) {
-                    comparisonText = 'Close to national average';
-                } else if (isWorse) {
-                    comparisonText = `${Math.abs(d.deviationPct).toFixed(0)}% worse than national average`;
-                } else {
-                    comparisonText = `${Math.abs(d.deviationPct).toFixed(0)}% better than national average`;
-                }
-
-                return `
-                    <div class="driver-card">
-                        <div class="driver-icon">${d.icon}</div>
-                        <div style="flex: 1;">
-                            <div class="driver-label">${d.label}</div>
-                            <div class="driver-value" style="color: ${isWorse ? '#DC3545' : Math.abs(d.deviationPct) < 5 ? '#64748B' : '#10B981'};">
-                                ${d.format(d.value)}
-                            </div>
-                            <div style="font-size: 0.8rem; color: #64748B; margin-top: 4px;">
-                                ${comparisonText}<br>
-                                <span style="font-size: 0.75rem;">England avg: ${d.format(d.benchmark)}</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            document.getElementById('modalDrivers').innerHTML = driversHTML;
+            document.getElementById('modalDrivers').innerHTML = sectionsHTML;
             document.getElementById('deepDiveModal').style.display = 'flex';
         }
 
@@ -1887,73 +1888,51 @@
 
             if (lsoaDataArray.length === 0) return;
 
-            const insights = [];
+            // Calculate key statistics
+            const growthPercentiles = lsoaDataArray.map(d => d.hlnm.gp);
+            const avgGrowth = growthPercentiles.reduce((a, b) => a + b, 0) / growthPercentiles.length;
+            const growthRange = Math.max(...growthPercentiles) - Math.min(...growthPercentiles);
 
-            // 1. Most challenged LSOA
-            const mostChallenged = lsoaDataArray.reduce((prev, curr) =>
-                (curr.hlnm.gp > prev.hlnm.gp) ? curr : prev
+            const mostChallenged = lsoaDataArray.reduce((prev, curr) => (curr.hlnm.gp > prev.hlnm.gp) ? curr : prev);
+            const leastChallenged = lsoaDataArray.reduce((prev, curr) => (curr.hlnm.gp < prev.hlnm.gp) ? curr : prev);
+
+            // Income variation
+            const incomes = lsoaDataArray.map(d => d.econ.income).filter(i => i > 0);
+            const avgIncome = incomes.reduce((a, b) => a + b, 0) / incomes.length;
+            const lowestIncome = lsoaDataArray.reduce((prev, curr) =>
+                ((curr.econ.income || 999999) < (prev.econ.income || 999999)) ? curr : prev
             );
-            insights.push(`
-                <div class="story-insight">
-                    <strong>${mostChallenged.name}</strong> faces the greatest economic growth challenges
-                    (${mostChallenged.hlnm.gp}th percentile), with ${mostChallenged.econ.uc_search?.toFixed(1)}% of residents
-                    on Universal Credit searching for work.
-                </div>
-            `);
 
-            // 2. GVA decline variation
-            const gvaDecliners = lsoaDataArray.filter(d => d.econ.gva_change < 0);
-            if (gvaDecliners.length > 0) {
-                const steepestDecline = gvaDecliners.reduce((prev, curr) =>
-                    (curr.econ.gva_change < prev.econ.gva_change) ? curr : prev
-                );
-                insights.push(`
-                    <div class="story-insight">
-                        Economic productivity has declined across the neighbourhood, with <strong>${steepestDecline.name}</strong>
-                        experiencing the steepest fall (${steepestDecline.econ.gva_change?.toFixed(1)}% between 2012-2022).
-                    </div>
-                `);
+            // GVA trends
+            const gvaChanges = lsoaDataArray.map(d => d.econ.gva_change).filter(g => g !== null && g !== undefined);
+            const avgGVAChange = gvaChanges.reduce((a, b) => a + b, 0) / gvaChanges.length;
+            const declining = gvaChanges.filter(g => g < 0).length;
+
+            // Skills concentration
+            const noQualsData = lsoaDataArray.map(d => ({ name: d.name, val: d.econ.no_quals })).filter(d => d.val > 0);
+            const highestNoQuals = noQualsData.reduce((prev, curr) => (curr.val > prev.val) ? curr : prev, noQualsData[0] || { val: 0 });
+
+            // Build narrative
+            let narrative = `This neighbourhood spans ${areaLSOAs.length} small areas with marked variation in economic circumstances. `;
+
+            narrative += `Economic growth challenges range from the ${leastChallenged.hlnm.gp}th to ${mostChallenged.hlnm.gp}th percentile nationally—a ${growthRange}-point spread that reveals how uneven opportunity is even within a single postcode. `;
+
+            if (avgGVAChange < 0) {
+                narrative += `Economic productivity has contracted ${avgGVAChange.toFixed(1)}% on average since 2012, with ${declining} of ${gvaChanges.length} areas experiencing outright decline. `;
+            } else {
+                narrative += `While productivity has grown modestly (${avgGVAChange.toFixed(1)}% since 2012), this masks ${declining} areas still contracting. `;
             }
 
-            // 3. Digital divide
-            const broadbandSpeeds = lsoaDataArray.filter(d => d.econ.broadband > 0);
-            if (broadbandSpeeds.length > 1) {
-                const fastest = broadbandSpeeds.reduce((prev, curr) =>
-                    (curr.econ.broadband > prev.econ.broadband) ? curr : prev
-                );
-                const slowest = broadbandSpeeds.reduce((prev, curr) =>
-                    (curr.econ.broadband < prev.econ.broadband) ? curr : prev
-                );
-                const gap = fastest.econ.broadband - slowest.econ.broadband;
-                if (gap > 50) {
-                    insights.push(`
-                        <div class="story-insight">
-                            A digital divide exists: <strong>${fastest.name}</strong> has broadband speeds of
-                            ${fastest.econ.broadband?.toFixed(0)} Mbps, while <strong>${slowest.name}</strong>
-                            only reaches ${slowest.econ.broadband?.toFixed(0)} Mbps.
-                        </div>
-                    `);
-                }
+            narrative += `Household incomes average £${Math.round(avgIncome).toLocaleString()}, but ${lowestIncome.name} sits far below at £${Math.round(lowestIncome.econ.income).toLocaleString()}. `;
+
+            if (highestNoQuals.val > 15) {
+                narrative += `Skills deficits compound these challenges—${highestNoQuals.name} has ${highestNoQuals.val.toFixed(1)}% of residents with no formal qualifications, limiting pathways to better-paid work. `;
             }
 
-            // 4. Skills gap
-            const noQualsRange = lsoaDataArray.filter(d => d.econ.no_quals > 0);
-            if (noQualsRange.length > 1) {
-                const highest = noQualsRange.reduce((prev, curr) =>
-                    (curr.econ.no_quals > prev.econ.no_quals) ? curr : prev
-                );
-                insights.push(`
-                    <div class="story-insight">
-                        Skills challenges are concentrated in <strong>${highest.name}</strong>, where
-                        ${highest.econ.no_quals?.toFixed(1)}% of residents have no formal qualifications.
-                    </div>
-                `);
-            }
+            narrative += `The data tells a story not just of deprivation, but of fragmentation: adjacent streets living fundamentally different economic realities.`;
 
-            if (insights.length > 0) {
-                document.getElementById('storyInsights').innerHTML = insights.join('');
-                document.getElementById('storySection').style.display = 'block';
-            }
+            document.getElementById('storyInsights').innerHTML = `<p style="margin: 0; line-height: 1.8; font-size: 0.95rem;">${narrative}</p>`;
+            document.getElementById('storySection').style.display = 'block';
         }
 
         // Initialize
