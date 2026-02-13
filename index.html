@@ -1845,22 +1845,20 @@
                 const deviation = inverse ?
                     (value - benchmark) :
                     (benchmark - value);
-                const deviationPct = ((inverse ? value - benchmark : benchmark - value) / benchmark) * 100;
                 const isWorse = deviation > 0;
 
+                // Simple "higher" or "lower" comparison
                 let comparisonText;
-                if (Math.abs(deviationPct) < 5) {
-                    comparisonText = 'Close to England average';
-                } else if (isWorse) {
-                    comparisonText = `${Math.abs(deviationPct).toFixed(0)}% worse`;
+                if (isWorse) {
+                    comparisonText = 'Higher';
                 } else {
-                    comparisonText = `${Math.abs(deviationPct).toFixed(0)}% better`;
+                    comparisonText = 'Lower';
                 }
 
                 return {
                     isWorse,
                     comparisonText,
-                    color: isWorse ? '#DC3545' : Math.abs(deviationPct) < 5 ? '#64748B' : '#10B981'
+                    color: isWorse ? '#DC3545' : '#10B981'
                 };
             }
 
