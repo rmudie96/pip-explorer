@@ -1960,24 +1960,18 @@
             const noQualsData = lsoaDataArray.map(d => ({ name: d.name, val: d.econ.no_quals })).filter(d => d.val > 0);
             const highestNoQuals = noQualsData.reduce((prev, curr) => (curr.val > prev.val) ? curr : prev, noQualsData[0] || { val: 0 });
 
-            // Build narrative
-            let narrative = `This neighbourhood spans ${areaLSOAs.length} small areas with marked variation in economic circumstances. `;
+            // Build narrative - simple and factual
+            let narrative = `This neighbourhood contains ${areaLSOAs.length} small areas. `;
 
-            narrative += `Economic growth challenges range from the ${leastChallenged.hlnm.gp}th to ${mostChallenged.hlnm.gp}th percentile nationally—a ${growthRange}-point spread that reveals how uneven opportunity is even within a single postcode. `;
+            narrative += `Economic growth challenges vary significantly, ranging from the ${leastChallenged.hlnm.gp}th to ${mostChallenged.hlnm.gp}th percentile nationally. `;
 
-            if (avgGVAChange < 0) {
-                narrative += `Economic productivity has contracted ${avgGVAChange.toFixed(1)}% on average since 2012, with ${declining} of ${gvaChanges.length} areas experiencing outright decline. `;
-            } else {
-                narrative += `While productivity has grown modestly (${avgGVAChange.toFixed(1)}% since 2012), this masks ${declining} areas still contracting. `;
-            }
-
-            narrative += `Household incomes average £${Math.round(avgIncome).toLocaleString()}, but ${lowestIncome.name} sits far below at £${Math.round(lowestIncome.econ.income).toLocaleString()}. `;
+            narrative += `Average household income is £${Math.round(avgIncome).toLocaleString()}, with the lowest at £${Math.round(lowestIncome.econ.income).toLocaleString()}. `;
 
             if (highestNoQuals.val > 15) {
-                narrative += `Skills deficits compound these challenges—${highestNoQuals.name} has ${highestNoQuals.val.toFixed(1)}% of residents with no formal qualifications, limiting pathways to better-paid work. `;
+                narrative += `${highestNoQuals.val.toFixed(1)}% of residents in one area have no formal qualifications. `;
             }
 
-            narrative += `The data tells a story not just of deprivation, but of fragmentation: adjacent streets living fundamentally different economic realities.`;
+            narrative += `There is significant variation in economic conditions within this neighbourhood.`;
 
             document.getElementById('storyInsights').innerHTML = `<p style="margin: 0; line-height: 1.8; font-size: 0.95rem;">${narrative}</p>`;
             document.getElementById('storySection').style.display = 'block';
