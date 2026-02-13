@@ -59,6 +59,7 @@
             color: var(--dark-grey);
             line-height: 1.7;
             overflow-x: hidden;
+            scroll-behavior: smooth;
         }
 
         /* Hero Section */
@@ -240,13 +241,14 @@
 
         /* Area Header */
         .area-header {
-            background: white;
-            border-radius: 20px;
-            padding: 3rem;
-            margin-bottom: 2.5rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            background: linear-gradient(135deg, white 0%, #F8F9FA 100%);
+            border-radius: 24px;
+            padding: 3.5rem;
+            margin-bottom: 3rem;
+            box-shadow: 0 8px 40px rgba(0, 43, 92, 0.1);
             position: relative;
             overflow: hidden;
+            border: 2px solid var(--light-grey);
         }
 
         .area-header::before {
@@ -254,9 +256,19 @@
             position: absolute;
             top: 0;
             left: 0;
-            width: 6px;
+            width: 8px;
             height: 100%;
             background: linear-gradient(180deg, var(--primary-teal) 0%, var(--deep-teal) 100%);
+            box-shadow: 2px 0 12px rgba(0, 155, 159, 0.3);
+        }
+
+        .area-header::after {
+            content: '📍';
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            font-size: 5rem;
+            opacity: 0.04;
         }
 
         .area-title {
@@ -276,10 +288,15 @@
         /* Section Cards */
         .section {
             background: white;
-            border-radius: 20px;
+            border-radius: 24px;
             padding: 3rem;
             margin-bottom: 2.5rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 8px 40px rgba(0, 43, 92, 0.08);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .section:hover {
+            box-shadow: 0 12px 50px rgba(0, 43, 92, 0.12);
         }
 
         .section-header {
@@ -444,13 +461,16 @@
         .mission-card {
             background: white;
             border: 2px solid var(--light-grey);
-            border-radius: 16px;
+            border-radius: 20px;
             overflow: hidden;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
         }
 
         .mission-card:hover {
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 12px 40px rgba(0, 43, 92, 0.12);
+            transform: translateY(-2px);
+            border-color: var(--primary-teal);
         }
 
         .mission-header {
@@ -575,16 +595,34 @@
 
         .imd-card {
             background: linear-gradient(135deg, var(--warm-grey) 0%, white 100%);
-            padding: 2rem;
-            border-radius: 16px;
+            padding: 2.25rem;
+            border-radius: 20px;
             border: 2px solid var(--light-grey);
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .imd-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 0;
+            background: var(--primary-teal);
+            transition: height 0.3s ease;
         }
 
         .imd-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+            transform: translateY(-6px);
+            box-shadow: 0 16px 48px rgba(0, 43, 92, 0.15);
             border-color: var(--primary-teal);
+        }
+
+        .imd-card:hover::before {
+            height: 100%;
         }
 
         .imd-score {
@@ -829,11 +867,23 @@
 
         /* Story Insights Section */
         .story-section {
-            background: linear-gradient(135deg, var(--warm-grey) 0%, white 100%);
-            padding: 2.5rem;
-            border-radius: 16px;
+            background: linear-gradient(135deg, #F8F9FA 0%, white 100%);
+            padding: 3rem;
+            border-radius: 24px;
             margin: 2rem 0;
             border: 2px solid var(--light-grey);
+            box-shadow: 0 8px 32px rgba(0, 43, 92, 0.08);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .story-section::before {
+            content: '📊';
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            font-size: 4rem;
+            opacity: 0.05;
         }
 
         .story-title {
