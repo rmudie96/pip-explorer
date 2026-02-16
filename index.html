@@ -1588,6 +1588,9 @@
             });
         }
 
+        // IMD Domain Percentiles - National data from MSOA_IoD 2025 files
+        const IMD_PERCENTILES = {"E02005355":{"name":"Eyres Monsell","domains":{"Crime":{"percentile":52.6,"rank":15573},"Education":{"percentile":25.3,"rank":24525},"Employment":{"percentile":32.3,"rank":22245},"Income":{"percentile":30.7,"rank":22775},"Health":{"percentile":34.1,"rank":21636},"Living":{"percentile":30.4,"rank":22873},"Overall":{"percentile":27.1,"rank":23929},"Barriers":{"percentile":51.8,"rank":15823}}},"E02001954":{"name":"Hawkesley","domains":{"Crime":{"percentile":95.8,"rank":1383},"Education":{"percentile":89.1,"rank":3569},"Employment":{"percentile":95.8,"rank":1382},"Income":{"percentile":92.2,"rank":2557},"Health":{"percentile":94.9,"rank":1676},"Living":{"percentile":30.6,"rank":22781},"Overall":{"percentile":93.9,"rank":2013},"Barriers":{"percentile":40.9,"rank":19419}}},"E02005442":{"name":"Kettering Avondale Grange","domains":{"Crime":{"percentile":92.2,"rank":2562},"Education":{"percentile":94.9,"rank":1679},"Employment":{"percentile":94.2,"rank":1906},"Income":{"percentile":89.5,"rank":3452},"Health":{"percentile":93.2,"rank":2220},"Living":{"percentile":16,"rank":27605},"Overall":{"percentile":93.5,"rank":2131},"Barriers":{"percentile":78.8,"rank":6969}}},"E02001306":{"name":"Seacombe","domains":{"Crime":{"percentile":40.3,"rank":19615},"Education":{"percentile":53.2,"rank":15356},"Employment":{"percentile":51.6,"rank":15897},"Income":{"percentile":36.6,"rank":20817},"Health":{"percentile":60.8,"rank":12882},"Living":{"percentile":31.1,"rank":22643},"Overall":{"percentile":38.4,"rank":20228},"Barriers":{"percentile":5.1,"rank":31175}}},"E02003505":{"name":"Penhill","domains":{"Crime":{"percentile":53.6,"rank":15235},"Education":{"percentile":19.7,"rank":26382},"Employment":{"percentile":37.8,"rank":20425},"Income":{"percentile":41.5,"rank":19215},"Health":{"percentile":51.9,"rank":15796},"Living":{"percentile":85,"rank":4930},"Overall":{"percentile":45.2,"rank":17988},"Barriers":{"percentile":53.6,"rank":15239}}},"E02001407":{"name":"Norris Green East","domains":{"Crime":{"percentile":38.8,"rank":20094},"Education":{"percentile":25.8,"rank":24380},"Employment":{"percentile":42.9,"rank":18770},"Income":{"percentile":25.8,"rank":24367},"Health":{"percentile":55.8,"rank":14503},"Living":{"percentile":41,"rank":19379},"Overall":{"percentile":32.8,"rank":22068},"Barriers":{"percentile":44.7,"rank":18169}}},"E02002388":{"name":"Armley & New Wortley","domains":{"Crime":{"percentile":90.8,"rank":3031},"Education":{"percentile":77,"rank":7570},"Employment":{"percentile":77.7,"rank":7332},"Income":{"percentile":77,"rank":7562},"Health":{"percentile":75.5,"rank":8055},"Living":{"percentile":60.6,"rank":12940},"Overall":{"percentile":77.6,"rank":7347},"Barriers":{"percentile":33.9,"rank":21708}}},"E02001947":{"name":"Druids Heath","domains":{"Crime":{"percentile":94.6,"rank":1780},"Education":{"percentile":92.7,"rank":2412},"Employment":{"percentile":98.2,"rank":578},"Income":{"percentile":96.9,"rank":1021},"Health":{"percentile":95.5,"rank":1468},"Living":{"percentile":63.6,"rank":11960},"Overall":{"percentile":97.1,"rank":938},"Barriers":{"percentile":56,"rank":14447}}},"E02004207":{"name":"Crook North & Tow Law","domains":{"Crime":{"percentile":11.6,"rank":29023},"Education":{"percentile":45.2,"rank":17992},"Employment":{"percentile":44.6,"rank":18207},"Income":{"percentile":41.8,"rank":19114},"Health":{"percentile":39.9,"rank":19739},"Living":{"percentile":41.1,"rank":19360},"Overall":{"percentile":47.3,"rank":17306},"Barriers":{"percentile":82.5,"rank":5734}}},"E02002387":{"name":"Farnley East","domains":{"Crime":{"percentile":91.9,"rank":2670},"Education":{"percentile":84.7,"rank":5017},"Employment":{"percentile":80.5,"rank":6404},"Income":{"percentile":78.9,"rank":6926},"Health":{"percentile":79.9,"rank":6611},"Living":{"percentile":64.8,"rank":11546},"Overall":{"percentile":85,"rank":4925},"Barriers":{"percentile":19.6,"rank":26394}}},"E02001949":{"name":"Kingstanding South East","domains":{"Crime":{"percentile":75.2,"rank":8159},"Education":{"percentile":67.2,"rank":10777},"Employment":{"percentile":73,"rank":8868},"Income":{"percentile":66.7,"rank":10934},"Health":{"percentile":83.3,"rank":5485},"Living":{"percentile":44.7,"rank":18154},"Overall":{"percentile":69.4,"rank":10059},"Barriers":{"percentile":23.7,"rank":25044}}},"E02001095":{"name":"Harpurhey South & Monsall","domains":{"Crime":{"percentile":82.9,"rank":5604},"Education":{"percentile":82.1,"rank":5892},"Employment":{"percentile":90.5,"rank":3124},"Income":{"percentile":84.5,"rank":5079},"Health":{"percentile":96.4,"rank":1186},"Living":{"percentile":34.1,"rank":21649},"Overall":{"percentile":88.2,"rank":3871},"Barriers":{"percentile":53.1,"rank":15403}}},"E02005440":{"name":"Corby Kingswood","domains":{"Crime":{"percentile":46,"rank":17738},"Education":{"percentile":86.2,"rank":4521},"Employment":{"percentile":88.2,"rank":3878},"Income":{"percentile":72.5,"rank":9025},"Health":{"percentile":79.2,"rank":6817},"Living":{"percentile":86.6,"rank":4391},"Overall":{"percentile":85.8,"rank":4678},"Barriers":{"percentile":92.3,"rank":2531}}},"E02004206":{"name":"Stanley South","domains":{"Crime":{"percentile":30.9,"rank":22680},"Education":{"percentile":55.9,"rank":14498},"Employment":{"percentile":61.3,"rank":12708},"Income":{"percentile":48.1,"rank":17051},"Health":{"percentile":58.6,"rank":13595},"Living":{"percentile":51.1,"rank":16045},"Overall":{"percentile":53.5,"rank":15280},"Barriers":{"percentile":59.3,"rank":13375}}},"E02001952":{"name":"Fox Hollies","domains":{"Crime":{"percentile":94,"rank":1979},"Education":{"percentile":86.4,"rank":4479},"Employment":{"percentile":96.4,"rank":1193},"Income":{"percentile":93.1,"rank":2268},"Health":{"percentile":94.7,"rank":1743},"Living":{"percentile":39.5,"rank":19881},"Overall":{"percentile":94,"rank":1960},"Barriers":{"percentile":49.1,"rank":16711}}},"E02001094":{"name":"Benchill South & Wythenshawe Central","domains":{"Crime":{"percentile":93.6,"rank":2099},"Education":{"percentile":92.8,"rank":2374},"Employment":{"percentile":96.5,"rank":1136},"Income":{"percentile":96.5,"rank":1155},"Health":{"percentile":97.8,"rank":734},"Living":{"percentile":34.8,"rank":21426},"Overall":{"percentile":96.6,"rank":1133},"Barriers":{"percentile":59.7,"rank":13238}}},"E02001951":{"name":"Sparkbrook North","domains":{"Crime":{"percentile":91.3,"rank":2844},"Education":{"percentile":90.9,"rank":2978},"Employment":{"percentile":92.7,"rank":2385},"Income":{"percentile":91.7,"rank":2713},"Health":{"percentile":88.4,"rank":3809},"Living":{"percentile":31,"rank":22669},"Overall":{"percentile":91.6,"rank":2752},"Barriers":{"percentile":71.4,"rank":9408}}},"E02005441":{"name":"Queensway","domains":{"Crime":{"percentile":27,"rank":23985},"Education":{"percentile":65.4,"rank":11350},"Employment":{"percentile":60.2,"rank":13059},"Income":{"percentile":50.2,"rank":16346},"Health":{"percentile":57.5,"rank":13950},"Living":{"percentile":75.5,"rank":8045},"Overall":{"percentile":67.4,"rank":10705},"Barriers":{"percentile":96.7,"rank":1094}}},"E02001405":{"name":"Speke East","domains":{"Crime":{"percentile":81.9,"rank":5936},"Education":{"percentile":92.9,"rank":2344},"Employment":{"percentile":97.7,"rank":767},"Income":{"percentile":95.7,"rank":1413},"Health":{"percentile":97.5,"rank":814},"Living":{"percentile":40,"rank":19696},"Overall":{"percentile":95.7,"rank":1410},"Barriers":{"percentile":32.5,"rank":22169}}},"E02005357":{"name":"Thurnby Lodge","domains":{"Crime":{"percentile":59.5,"rank":13297},"Education":{"percentile":52,"rank":15757},"Employment":{"percentile":46.9,"rank":17425},"Income":{"percentile":50.7,"rank":16186},"Health":{"percentile":37.3,"rank":20581},"Living":{"percentile":24.1,"rank":24921},"Overall":{"percentile":46,"rank":17751},"Barriers":{"percentile":73.6,"rank":8671}}},"E02006545":{"name":"Wick & Toddington","domains":{"Crime":{"percentile":59.7,"rank":13249},"Education":{"percentile":74.7,"rank":8296},"Employment":{"percentile":61.4,"rank":12669},"Income":{"percentile":65.3,"rank":11387},"Health":{"percentile":66.8,"rank":10889},"Living":{"percentile":24.4,"rank":24825},"Overall":{"percentile":64.6,"rank":11618},"Barriers":{"percentile":80.6,"rank":6386}}},"E02001305":{"name":"Birkenhead Central","domains":{"Crime":{"percentile":42,"rank":19042},"Education":{"percentile":52.3,"rank":15682},"Employment":{"percentile":46.5,"rank":17586},"Income":{"percentile":33.7,"rank":21762},"Health":{"percentile":61.4,"rank":12665},"Living":{"percentile":41.6,"rank":19173},"Overall":{"percentile":40.1,"rank":19682},"Barriers":{"percentile":35.5,"rank":21195}}},"E02002653":{"name":"Boulevard & St Andrew's Quay","domains":{"Crime":{"percentile":97.4,"rank":856},"Education":{"percentile":95.9,"rank":1355},"Employment":{"percentile":97.5,"rank":831},"Income":{"percentile":96.4,"rank":1186},"Health":{"percentile":92.5,"rank":2455},"Living":{"percentile":31.7,"rank":22448},"Overall":{"percentile":96.9,"rank":1009},"Barriers":{"percentile":63.9,"rank":11872}}},"E02001408":{"name":"Fairfield West & Newsham Park","domains":{"Crime":{"percentile":28.5,"rank":23489},"Education":{"percentile":34.3,"rank":21585},"Employment":{"percentile":46,"rank":17752},"Income":{"percentile":31.4,"rank":22540},"Health":{"percentile":64.8,"rank":11560},"Living":{"percentile":61.2,"rank":12744},"Overall":{"percentile":37.6,"rank":20490},"Barriers":{"percentile":25,"rank":24626}}},"E02005356":{"name":"Braunstone Park West","domains":{"Crime":{"percentile":46.4,"rank":17600},"Education":{"percentile":11.5,"rank":29053},"Employment":{"percentile":24.2,"rank":24882},"Income":{"percentile":21.8,"rank":25686},"Health":{"percentile":21,"rank":25958},"Living":{"percentile":40.5,"rank":19548},"Overall":{"percentile":18.4,"rank":26804},"Barriers":{"percentile":35.5,"rank":21192}}},"E02002386":{"name":"Seacroft North & Monkswood","domains":{"Crime":{"percentile":59.5,"rank":13313},"Education":{"percentile":36,"rank":21009},"Employment":{"percentile":30.5,"rank":22827},"Income":{"percentile":22.6,"rank":25425},"Health":{"percentile":40.3,"rank":19595},"Living":{"percentile":48.1,"rank":17032},"Overall":{"percentile":26.9,"rank":24019},"Barriers":{"percentile":-0.4,"rank":32989}}},"E02003506":{"name":"Walcot East","domains":{"Crime":{"percentile":41.4,"rank":19241},"Education":{"percentile":9.5,"rank":29713},"Employment":{"percentile":41.2,"rank":19298},"Income":{"percentile":44.2,"rank":18311},"Health":{"percentile":41,"rank":19362},"Living":{"percentile":75,"rank":8213},"Overall":{"percentile":35.3,"rank":21241},"Barriers":{"percentile":24.7,"rank":24747}}},"E02001950":{"name":"Woodgate","domains":{"Crime":{"percentile":61.5,"rank":12647},"Education":{"percentile":58.7,"rank":13561},"Employment":{"percentile":64.3,"rank":11719},"Income":{"percentile":58.8,"rank":13534},"Health":{"percentile":69.4,"rank":10051},"Living":{"percentile":63.7,"rank":11911},"Overall":{"percentile":59.4,"rank":13340},"Barriers":{"percentile":28.7,"rank":23432}}},"E02002652":{"name":"Greatfield","domains":{}},"E02006855":{"name":"Hartcliffe","domains":{"Crime":{"percentile":79,"rank":6914},"Education":{"percentile":60.6,"rank":12955},"Employment":{"percentile":64.2,"rank":11774},"Income":{"percentile":65.8,"rank":11242},"Health":{"percentile":59.2,"rank":13393},"Living":{"percentile":40.5,"rank":19528},"Overall":{"percentile":63.4,"rank":12033},"Barriers":{"percentile":58.9,"rank":13488}}},"E02002385":{"name":"Middleton Park Avenue","domains":{"Crime":{"percentile":81.8,"rank":5965},"Education":{"percentile":65.5,"rank":11326},"Employment":{"percentile":41,"rank":19382},"Income":{"percentile":52.1,"rank":15735},"Health":{"percentile":72.8,"rank":8938},"Living":{"percentile":97.5,"rank":809},"Overall":{"percentile":69,"rank":10169},"Barriers":{"percentile":26.3,"rank":24191}}},"E02001307":{"name":"Woodchurch","domains":{"Crime":{"percentile":17.5,"rank":27092},"Education":{"percentile":20.6,"rank":26073},"Employment":{"percentile":19.8,"rank":26331},"Income":{"percentile":8.9,"rank":29934},"Health":{"percentile":36.6,"rank":20822},"Living":{"percentile":21.5,"rank":25793},"Overall":{"percentile":9.7,"rank":29661},"Barriers":{"percentile":20,"rank":26290}}},"E02004205":{"name":"Peterlee East","domains":{"Crime":{"percentile":39.3,"rank":19942},"Education":{"percentile":63.2,"rank":12089},"Employment":{"percentile":60.3,"rank":13040},"Income":{"percentile":49.2,"rank":16686},"Health":{"percentile":56.5,"rank":14288},"Living":{"percentile":30.2,"rank":22925},"Overall":{"percentile":51.6,"rank":15910},"Barriers":{"percentile":63.3,"rank":12053}}},"E02006502":{"name":"Whitehawk","domains":{"Crime":{"percentile":23.8,"rank":25020},"Education":{"percentile":42.3,"rank":18938},"Employment":{"percentile":34.9,"rank":21388},"Income":{"percentile":33.5,"rank":21854},"Health":{"percentile":39.8,"rank":19763},"Living":{"percentile":23.6,"rank":25103},"Overall":{"percentile":27.6,"rank":23790},"Barriers":{"percentile":21,"rank":25962}}},"E02001097":{"name":"Gorton South","domains":{"Crime":{"percentile":78.6,"rank":7026},"Education":{"percentile":84,"rank":5247},"Employment":{"percentile":92.1,"rank":2581},"Income":{"percentile":84.5,"rank":5102},"Health":{"percentile":93.5,"rank":2123},"Living":{"percentile":30.9,"rank":22686},"Overall":{"percentile":88.2,"rank":3892},"Barriers":{"percentile":55.9,"rank":14485}}},"E02001948":{"name":"Glebe Farm","domains":{"Crime":{"percentile":67.7,"rank":10603},"Education":{"percentile":63.1,"rank":12114},"Employment":{"percentile":63.3,"rank":12060},"Income":{"percentile":64.4,"rank":11681},"Health":{"percentile":74.4,"rank":8409},"Living":{"percentile":60,"rank":13146},"Overall":{"percentile":64.9,"rank":11527},"Barriers":{"percentile":56.6,"rank":14263}}},"E02001096":{"name":"Clayton Vale","domains":{"Crime":{"percentile":73.2,"rank":8794},"Education":{"percentile":72.9,"rank":8886},"Employment":{"percentile":81.8,"rank":5994},"Income":{"percentile":76.5,"rank":7726},"Health":{"percentile":88.4,"rank":3827},"Living":{"percentile":33.8,"rank":21733},"Overall":{"percentile":78.7,"rank":6988},"Barriers":{"percentile":66,"rank":11154}}},"E02001953":{"name":"Nechells","domains":{"Crime":{"percentile":61.5,"rank":12641},"Education":{"percentile":44.4,"rank":18260},"Employment":{"percentile":55.4,"rank":14640},"Income":{"percentile":53.3,"rank":15353},"Health":{"percentile":66.8,"rank":10906},"Living":{"percentile":51.1,"rank":16064},"Overall":{"percentile":51.7,"rank":15861},"Barriers":{"percentile":17.4,"rank":27124}}},"E02002651":{"name":"Orchard Park","domains":{"Crime":{"percentile":53.2,"rank":15369},"Education":{"percentile":59.4,"rank":13337},"Employment":{"percentile":63.6,"rank":11961},"Income":{"percentile":54.8,"rank":14851},"Health":{"percentile":86.1,"rank":4563},"Living":{"percentile":70.8,"rank":9593},"Overall":{"percentile":62.2,"rank":12413},"Barriers":{"percentile":9.1,"rank":29859}}},"E02001406":{"name":"Everton East","domains":{"Crime":{"percentile":20.5,"rank":26122},"Education":{"percentile":15.7,"rank":27697},"Employment":{"percentile":39.3,"rank":19934},"Income":{"percentile":24.1,"rank":24926},"Health":{"percentile":53.2,"rank":15373},"Living":{"percentile":48.9,"rank":16788},"Overall":{"percentile":28.2,"rank":23566},"Barriers":{"percentile":46.1,"rank":17691}}}};
+
         // Render IMD
         function renderIMD(area) {
             const container = document.getElementById('imd-grid');
@@ -1739,10 +1742,25 @@
                 return { percentile, narrativeKey, cssClass };
             }
 
+            // Map domain keys to percentile lookup keys
+            const domainMapping = {
+                'Index of Multiple Deprivation (IMD) Score': 'Overall',
+                'Income Score (rate)': 'Income',
+                'Employment Score (rate)': 'Employment',
+                'Education, Skills and Training Score': 'Education',
+                'Health Deprivation and Disability Score': 'Health',
+                'Crime Score': 'Crime',
+                'Barriers to Housing and Services Score': 'Barriers',
+                'Living Environment Score': 'Living'
+            };
+
             container.innerHTML = imdDomains.map(domain => {
                 const score = area[domain.key];
+                const domainKey = domainMapping[domain.key];
+                const areaData = IMD_PERCENTILES[area.msoa_code];
+                const percentile = areaData && areaData.domains[domainKey] ? areaData.domains[domainKey].percentile : null;
 
-                if (!score && score !== 0) {
+                if (!percentile && percentile !== 0) {
                     return `
                         <div class="imd-card">
                             <div class="imd-score low">N/A</div>
@@ -1752,48 +1770,20 @@
                     `;
                 }
 
-                // Classify based on score value (higher score = worse deprivation)
-                let cssClass, narrativeKey, label;
+                // Classify based on national percentile (higher percentile = worse deprivation)
+                let cssClass, narrativeKey;
+                const roundedPercentile = Math.round(percentile);
 
-                if (domain.key === 'Index of Multiple Deprivation (IMD) Score') {
-                    // IMD Score ranges 0-80+
-                    if (score >= 50) {
-                        cssClass = 'critical'; narrativeKey = 'top10'; label = 'Very High';
-                    } else if (score >= 40) {
-                        cssClass = 'critical'; narrativeKey = 'top20'; label = 'High';
-                    } else if (score >= 30) {
-                        cssClass = 'high'; narrativeKey = 'top30'; label = 'Moderate';
-                    } else if (score >= 20) {
-                        cssClass = 'moderate'; narrativeKey = 'top50'; label = 'Low';
-                    } else {
-                        cssClass = 'low'; narrativeKey = 'other'; label = 'Very Low';
-                    }
-                } else if (domain.key.includes('Score (rate)')) {
-                    // Rate scores (0-1 range)
-                    if (score >= 0.25) {
-                        cssClass = 'critical'; narrativeKey = 'top10'; label = 'Very High';
-                    } else if (score >= 0.20) {
-                        cssClass = 'critical'; narrativeKey = 'top20'; label = 'High';
-                    } else if (score >= 0.15) {
-                        cssClass = 'high'; narrativeKey = 'top30'; label = 'Moderate';
-                    } else if (score >= 0.10) {
-                        cssClass = 'moderate'; narrativeKey = 'top50'; label = 'Low';
-                    } else {
-                        cssClass = 'low'; narrativeKey = 'other'; label = 'Very Low';
-                    }
+                if (percentile >= 90) {
+                    cssClass = 'critical'; narrativeKey = 'top10';
+                } else if (percentile >= 80) {
+                    cssClass = 'critical'; narrativeKey = 'top20';
+                } else if (percentile >= 70) {
+                    cssClass = 'high'; narrativeKey = 'top30';
+                } else if (percentile >= 50) {
+                    cssClass = 'moderate'; narrativeKey = 'top50';
                 } else {
-                    // Other domain scores (varying ranges)
-                    if (score >= 40) {
-                        cssClass = 'critical'; narrativeKey = 'top10'; label = 'Very High';
-                    } else if (score >= 30) {
-                        cssClass = 'critical'; narrativeKey = 'top20'; label = 'High';
-                    } else if (score >= 20) {
-                        cssClass = 'high'; narrativeKey = 'top30'; label = 'Moderate';
-                    } else if (score >= 10) {
-                        cssClass = 'moderate'; narrativeKey = 'top50'; label = 'Low';
-                    } else {
-                        cssClass = 'low'; narrativeKey = 'other'; label = 'Very Low';
-                    }
+                    cssClass = 'low'; narrativeKey = 'other';
                 }
 
                 const narrative = domain.narratives[narrativeKey];
@@ -1801,12 +1791,12 @@
                 return `
                     <div class="imd-card">
                         <div class="imd-score ${cssClass}">
-                            <span style="font-size: 1.5rem; font-weight: 700;">${label}</span>
-                            <span style="font-size: 0.75rem; display: block; margin-top: 4px; opacity: 0.8;">Score: ${typeof score === 'number' ? score.toFixed(2) : score}</span>
+                            <span style="font-size: 1.5rem; font-weight: 700;">${roundedPercentile}th</span>
+                            <span style="font-size: 0.75rem; display: block; margin-top: -2px;">percentile</span>
                         </div>
                         <div class="imd-label">${domain.label}</div>
                         <div class="imd-description" style="margin-top: 8px; font-size: 0.875rem; line-height: 1.4;">
-                            <strong style="color: #1E293B;">${label} deprivation level,</strong> ${narrative}.
+                            <strong style="color: #1E293B;">Positioned in the ${roundedPercentile}th percentile nationally,</strong> ${narrative}.
                         </div>
                     </div>
                 `;
