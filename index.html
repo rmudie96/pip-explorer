@@ -1050,6 +1050,12 @@
         let map = null;
 
         // Helper functions
+        function getOrdinal(n) {
+            const s = ['th', 'st', 'nd', 'rd'];
+            const v = n % 100;
+            return n + (s[(v - 20) % 10] || s[v] || s[0]);
+        }
+
         function getNeedClass(percentile) {
             if (percentile >= 80) return 'critical';
             if (percentile >= 60) return 'high';
@@ -1234,7 +1240,7 @@
                                         percentile >= 40 ? 'moderate civic infrastructure present' :
                                         percentile >= 20 ? 'strong civic assets supporting community life' :
                                         'exceptional civic infrastructure with rich community assets';
-                        return `Positioned in the <strong>${percentile}th percentile</strong> nationally, reflecting ${narrative}.`;
+                        return `Positioned in the <strong>${getOrdinal(percentile)} percentile</strong> nationally, reflecting ${narrative}.`;
                     })() : 'No data available for civic assets ranking.'
                 },
                 {
@@ -1248,7 +1254,7 @@
                                         percentile >= 40 ? 'moderate levels of social connectedness' :
                                         percentile >= 20 ? 'solid community ties and social networks' :
                                         'exceptional social cohesion with strong community bonds';
-                        return `Positioned in the <strong>${percentile}th percentile</strong> nationally for social cohesion, reflecting ${narrative}.`;
+                        return `Positioned in the <strong>${getOrdinal(percentile)} percentile</strong> nationally for social cohesion, reflecting ${narrative}.`;
                     })() : 'No data available for connectedness.'
                 },
                 {
@@ -1262,7 +1268,7 @@
                                         percentile >= 40 ? 'moderate participation in community activities' :
                                         percentile >= 20 ? 'active community engagement in local affairs' :
                                         'vibrant civic participation with highly engaged residents';
-                        return `Positioned in the <strong>${percentile}th percentile</strong> nationally for civic participation, reflecting ${narrative}.`;
+                        return `Positioned in the <strong>${getOrdinal(percentile)} percentile</strong> nationally for civic participation, reflecting ${narrative}.`;
                     })() : 'No data available for community engagement.'
                 }
             ];
@@ -1403,7 +1409,7 @@
 
                                 popupContent += `<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 0.85rem;">
                                     <span>${m.icon} ${m.label}</span>
-                                    <span style="color: ${severity.color}; font-weight: 600;">${m.p}th percentile <span style="font-size: 0.75rem; color: #64748B;">(${severity.label})</span></span>
+                                    <span style="color: ${severity.color}; font-weight: 600;">${getOrdinal(m.p)} percentile <span style="font-size: 0.75rem; color: #64748B;">(${severity.label})</span></span>
                                 </div>`;
                             });
 
@@ -1791,12 +1797,12 @@
                 return `
                     <div class="imd-card">
                         <div class="imd-score ${cssClass}">
-                            <span style="font-size: 1.5rem; font-weight: 700;">${roundedPercentile}th</span>
+                            <span style="font-size: 1.5rem; font-weight: 700;">${getOrdinal(roundedPercentile)}</span>
                             <span style="font-size: 0.75rem; display: block; margin-top: -2px;">percentile</span>
                         </div>
                         <div class="imd-label">${domain.label}</div>
                         <div class="imd-description" style="margin-top: 8px; font-size: 0.875rem; line-height: 1.4;">
-                            <strong style="color: #1E293B;">Positioned in the ${roundedPercentile}th percentile nationally,</strong> ${narrative}.
+                            <strong style="color: #1E293B;">Positioned in the ${getOrdinal(roundedPercentile)} percentile nationally,</strong> ${narrative}.
                         </div>
                     </div>
                 `;
@@ -1987,7 +1993,7 @@
             // Build narrative - simple and factual
             let narrative = `This neighbourhood contains ${areaLSOAs.length} small areas. `;
 
-            narrative += `Economic growth challenges vary significantly, ranging from the ${leastChallenged.hlnm.gp}th to ${mostChallenged.hlnm.gp}th percentile nationally. `;
+            narrative += `Economic growth challenges vary significantly, ranging from the ${getOrdinal(leastChallenged.hlnm.gp)} to ${getOrdinal(mostChallenged.hlnm.gp)} percentile nationally. `;
 
             narrative += `Average household income is £${Math.round(avgIncome).toLocaleString()}, with the lowest at £${Math.round(lowestIncome.econ.income).toLocaleString()}. `;
 
