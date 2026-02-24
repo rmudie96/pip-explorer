@@ -1129,6 +1129,7 @@
 
         // Search functionality
         function handleSearch(query) {
+            console.log('Search query:', query, 'allAreas:', allAreas.length);
             const results = document.getElementById('search-results');
 
             if (!query || query.length < 2) {
@@ -2021,6 +2022,7 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             allAreas = DATA.areas || [];
+            console.log('Pride in Place Explorer: Loaded', allAreas.length, 'areas for search');
 
             const searchInput = document.getElementById('area-search');
             const searchResults = document.getElementById('search-results');
