@@ -1815,8 +1815,6 @@
                 jsa: 1.2,
                 uc_search: 2.5,
                 uc_total: 4.0,
-                gva: 35000,
-                gva_change: 25,
                 jobs_density: 0.8,
                 jobs_access: 750000,
                 income: 31400,
@@ -1841,10 +1839,8 @@
                     ]
                 },
                 {
-                    title: 'Economic Productivity',
+                    title: 'Business Growth',
                     indicators: [
-                        { label: 'GVA per Head (2022)', key: 'gva', format: v => '£' + v.toLocaleString(), inverse: false },
-                        { label: 'GVA Change (2012-2022)', key: 'gva_change', format: v => (v > 0 ? '+' : '') + v.toFixed(1) + '%', inverse: false },
                         { label: 'High Growth Businesses', key: 'highgrowth', format: v => v.toFixed(1) + '%', inverse: false }
                     ]
                 },
@@ -1983,11 +1979,6 @@
             const lowestIncome = lsoaDataArray.reduce((prev, curr) =>
                 ((curr.econ.income || 999999) < (prev.econ.income || 999999)) ? curr : prev
             );
-
-            // GVA trends
-            const gvaChanges = lsoaDataArray.map(d => d.econ.gva_change).filter(g => g !== null && g !== undefined);
-            const avgGVAChange = gvaChanges.reduce((a, b) => a + b, 0) / gvaChanges.length;
-            const declining = gvaChanges.filter(g => g < 0).length;
 
             // Skills concentration
             const noQualsData = lsoaDataArray.map(d => ({ name: d.name, val: d.econ.no_quals })).filter(d => d.val > 0);
